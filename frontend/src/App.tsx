@@ -1,30 +1,49 @@
-import React from 'react';
 import './App.scss';
 
 import { mdiAccount } from '@mdi/js'
-import Button from './components/Button';
 import IconButton from './components/IconButton';
 
-import colors from "./colors.module.scss";
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Link,
+    Navigate,
+} from "react-router-dom";
+
+import Home from './pages/Home';
+import Login from './pages/Login';
 
 function App() {
-  return (
-    <div className="page-container">
-      <div className="page-app-bar">
-        <img src="/logo.svg" alt="Logo" height={48}></img>
-        <div className="app-bar-title">Skelearn</div>
-        <div className="app-bar-spacer"></div>
-        <IconButton inverted={true} color="primary" size="small" icon={mdiAccount}></IconButton>
-      </div>
-      <div className="title-area">
-        <span className="title">Ske<span style={{color: colors["accent-color"]}}>learn</span></span>
-      </div>
-      <div className="content-area">
-        <span className='slogan'>Learn bones - become a boner.</span>
-        <Button size='large' color='accent'>Jetzt loslegen!</Button>
-      </div>
-    </div>
-  );
+    function test(e: any) {
+        console.log("nice", e);
+    }
+
+    return (
+        <BrowserRouter>
+            <div className="page-container">
+                <div className="page-app-bar">
+                    <img src="/logo.svg" alt="Logo" height={48}></img>
+                    <div className="app-bar-title">Skelearn</div>
+                    <div className="app-bar-spacer"></div>
+                    <Link to={"/login"}>
+                        <IconButton inverted={true} color="primary" size="small" icon={mdiAccount} onClick={test}></IconButton>
+                    </Link>
+                </div>
+                <div className='content'>
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                </div>
+                <div className='footer-spacer'></div>
+                <div className='page-footer'>
+                    Copyright oder sowas, außerdem haben wir ein Impressum (impressive, I know).
+                </div>
+            </div>
+        </BrowserRouter>
+    );
 }
 
 export default App;

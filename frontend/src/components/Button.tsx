@@ -1,4 +1,5 @@
 import './Button.scss'
+import { MouseEvent } from "react";
 
 import colors from "../colors.module.scss";
 
@@ -7,13 +8,13 @@ interface ButtonProps {
     color?: "accent" | "primary",
     size?: "small" | "large",
     children: string,
+    onClick: (e: MouseEvent) => void,
 }
 
 function Button(props: ButtonProps) {
     let { inverted = false, color = "primary", size = "small" } = props;
-    // <Icon size={size === "large" ? 1.333 : 1} path={mdiPlusThick} color={colors[color + (inverted ? "" : "-text") + "-color"]}></Icon>
     return (
-        <button className={"button-base button-" + color + (inverted ? "-inverted" : "") + " button-" + size}>
+        <button className={"button-base button-" + color + (inverted ? "-inverted" : "") + " button-" + size} onClick={props.onClick}>
             <div style={{ color: colors[color + (inverted ? "" : "-text") + "-color"] }}>{props.children}</div>
         </button>
     );
