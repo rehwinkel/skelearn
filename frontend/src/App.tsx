@@ -23,8 +23,10 @@ function App() {
         <BrowserRouter>
             <div className="page-container">
                 <div className="page-app-bar">
-                    <img src="/logo.svg" alt="Logo" height={48}></img>
-                    <div className="app-bar-title">Skelearn</div>
+                    <Link to="/" className='home-link'>
+                        <img src="/logo.svg" alt="Logo" height={48}></img>
+                        <div className="app-bar-title">Skelearn</div>
+                    </Link>
                     <div className="app-bar-spacer"></div>
                     <Link to={"/login"}>
                         <IconButton inverted={true} color="primary" size="small" icon={mdiAccount} onClick={test}></IconButton>
