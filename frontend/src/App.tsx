@@ -15,10 +15,6 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 
 function App() {
-    function test(e: any) {
-        console.log("nice", e);
-    }
-
     return (
         <BrowserRouter>
             <div className="page-container">
@@ -29,7 +25,7 @@ function App() {
                     </Link>
                     <div className="app-bar-spacer"></div>
                     <Link to={"/login"}>
-                        <IconButton inverted={true} color="primary" size="small" icon={mdiAccount} onClick={test}></IconButton>
+                        <IconButton inverted={true} color="primary" size="small" icon={mdiAccount} onClick={()=>{}}></IconButton>
                     </Link>
                 </div>
                 <div className='content'>
