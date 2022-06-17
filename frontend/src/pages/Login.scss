@@ -1,0 +1,7 @@
+@import "../colors.module.scss";
+
+.login-buttons {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+}
