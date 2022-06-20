@@ -5,3 +5,29 @@
     flex-direction: row;
     column-gap: 10px;
 }
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+
+.login-title {
+    display: block;
+    font-size: 40px;
+    color: $text-color;
+    margin-bottom: 20px;
+}
+
+.login-content {
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+.login-container {
+    margin: 50px 0px;
+    display: flex;
+    justify-content: center;
+}

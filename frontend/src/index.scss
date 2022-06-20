@@ -13,11 +13,3 @@ body {
 a {
   text-decoration: none;
 }
-
-::selection {
-  background: $primary-color;
-}
-
-::-moz-selection {
-  background: $primary-color;
-}
