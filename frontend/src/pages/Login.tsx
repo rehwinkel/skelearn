@@ -5,6 +5,7 @@ import Input from "../components/Input";
 import { Link } from "wouter";
 import { useState } from "react";
 import Loading from "../components/Loading";
+import Alert from "../components/Alert";
 
 function Login() {
     let [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ function Login() {
             <Loading loading={loading} style={{ borderRadius: "16px" }}>
                 <div className="login-content">
                     <span className="login-title">Login</span>
+                    <Alert>You are bad</Alert>
                     <form onSubmit={login}>
                         <div className="login-form">
                             <Input placeholder="Username" type="text" onChanged={(e) => { setUsername(e.target.value) }} />

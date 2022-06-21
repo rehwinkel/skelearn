@@ -1,0 +1,13 @@
+@import "../colors.module.scss";
+
+.alert-text {
+    color: $error-color;
+    margin-left: 8px;
+    display: block;
+    line-height: 24px;
+}
+
+.alert-container {
+    margin: 4px;
+    display: flex;
+}

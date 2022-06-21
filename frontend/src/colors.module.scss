@@ -5,6 +5,7 @@ $accent-color: #673ab7;
 $accent-color-dark: #320b86;
 $accent-text-color: #ffffff;
 $text-color: #000000CC;
+$error-color: #db4040;
 
 :export {
   primary-color: $primary-color;
@@ -14,4 +15,5 @@ $text-color: #000000CC;
   accent-color-dark: $accent-color-dark;
   accent-text-color: $accent-text-color;
   text-color: $text-color;
+  error-color: $error-color;
 }
