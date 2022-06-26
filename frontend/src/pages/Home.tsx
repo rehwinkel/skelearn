@@ -3,15 +3,9 @@ import "./Home.scss";
 import Button from "../components/Button";
 import colors from "../colors.module.scss";
 
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 
 function Home() {
-    let [_, setLocation] = useLocation();
-
-    function goToAppOrLogin(e: any) {
-        setLocation("/login", { replace: true });
-    }
-
     return (
         <div>
             <div className="title-area">
@@ -19,7 +13,9 @@ function Home() {
             </div>
             <div className="content-area">
                 <span className='slogan'>Learn bones - become a boner.</span>
-                <Button size='large' color='accent' onClick={goToAppOrLogin}>Jetzt loslegen!</Button>
+                <Link to="/dashboard">
+                    <Button size='large' color='accent' onClick={() => { }}>Jetzt loslegen!</Button>
+                </Link>
             </div>
         </div>
     );

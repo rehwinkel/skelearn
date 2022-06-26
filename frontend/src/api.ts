@@ -24,6 +24,12 @@ async function apiLogin(username: string, passwd: string): Promise<Response | nu
     }
 }
 
+async function apiCheckToken(token: string) {
+    await new Promise(r => setTimeout(r, 500));
+    return true;
+}
+
 export {
     apiLogin,
+    apiCheckToken,
 };

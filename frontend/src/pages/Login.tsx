@@ -1,13 +1,15 @@
 import "./Login.scss";
-import { apiLogin } from "../api";
 import Button from "../components/Button";
 import Input from "../components/Input";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import Loading from "../components/Loading";
 import Alert from "../components/Alert";
+import { AuthResult, useAuth } from "../auth";
 
 function Login() {
+    let [_, setLocation] = useLocation();
+    let auth = useAuth();
     let [loading, setLoading] = useState(false);
     let [username, setUsername] = useState("");
     let [password, setPassword] = useState("");
@@ -16,10 +18,15 @@ function Login() {
     async function login(e: any) {
         e.preventDefault();
         setLoading(true);
-        let response = await apiLogin(username, password);
-        setError("Dein Passwort ist falsch");
-        console.log(response);
+        let result = await auth.signIn(username, password);
         setLoading(false);
+        if (result === AuthResult.Ok) {
+            setLocation("/dashboard", { replace: true });
+        } else if (result === AuthResult.InvalidCreds) {
+            setError("Invalid credentials");
+        } else if (result === AuthResult.NoConnection) {
+            setError("No connection");
+        }
     }
 
     return (
