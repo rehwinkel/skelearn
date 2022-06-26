@@ -11,11 +11,13 @@ function Login() {
     let [loading, setLoading] = useState(false);
     let [username, setUsername] = useState("");
     let [password, setPassword] = useState("");
+    let [error, setError] = useState<string | null>(null);
 
     async function login(e: any) {
         e.preventDefault();
         setLoading(true);
         let response = await apiLogin(username, password);
+        setError("Dein Passwort ist falsch");
         console.log(response);
         setLoading(false);
     }
@@ -25,7 +27,7 @@ function Login() {
             <Loading loading={loading} style={{ borderRadius: "16px" }}>
                 <div className="login-content">
                     <span className="login-title">Login</span>
-                    <Alert>You are bad</Alert>
+                    {error === null ? null : <Alert>{error}</Alert>}
                     <form onSubmit={login}>
                         <div className="login-form">
                             <Input placeholder="Username" type="text" onChanged={(e) => { setUsername(e.target.value) }} />

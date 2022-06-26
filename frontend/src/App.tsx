@@ -8,6 +8,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 
 import { Link, Redirect, Route, Switch } from "wouter";
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 
 function App() {
     return (
@@ -26,6 +28,8 @@ function App() {
                 <Switch>
                     <Route path="/" ><Home /></Route>
                     <Route path="/login" ><Login /></Route>
+                    <Route path="/register" ><Register /></Route>
+                    <Route path="/dashboard" ><Dashboard /></Route>
                     <Route path="/:rest"><Redirect to="/" /></Route>
                 </Switch>
             </div>
