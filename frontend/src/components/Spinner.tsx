@@ -1,8 +1,8 @@
 import "./Spinner.scss";
 
-function Spinner() {
+function Spinner({ size }: { size: "small" | "large" }) {
     return (
-        <div className="lds-spinner">
+        <div className={"lds-spinner spinner-size-" + size}>
             <div></div>
             <div></div>
             <div></div>

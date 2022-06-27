@@ -1,29 +1,54 @@
-$size: 48px;
+$size-small: 48px;
+$size-large: 80px;
 $color: #444;
 
 .lds-spinner {
-    color: official;
     display: inline-block;
     position: relative;
-    width: $size;
-    height: $size;
+}
+
+.spinner-size-small {
+    width: $size-small;
+    height: $size-small;
+}
+
+.spinner-size-large {
+    width: $size-large;
+    height: $size-large;
 }
 
 .lds-spinner div {
-    transform-origin: calc($size / 2) calc($size / 2);
     animation: lds-spinner 1.2s linear infinite;
+}
+
+.spinner-size-small div {
+    transform-origin: calc($size-small / 2) calc($size-small / 2);
+}
+
+.spinner-size-large div {
+    transform-origin: calc($size-large / 2) calc($size-large / 2);
 }
 
 .lds-spinner div:after {
     content: " ";
     display: block;
     position: absolute;
-    top: calc($size * 0.0375);
-    left: calc($size / 2 - $size * 0.0375);
-    width: calc($size * 0.075);
-    height: calc($size * 0.225);
     border-radius: 20%;
     background: $color;
+}
+
+.spinner-size-small div:after {
+    top: calc($size-small * 0.0375);
+    left: calc($size-small / 2 - $size-small * 0.0375);
+    width: calc($size-small * 0.075);
+    height: calc($size-small * 0.225);
+}
+
+.spinner-size-large div:after {
+    top: calc($size-large * 0.0375);
+    left: calc($size-large / 2 - $size-large * 0.0375);
+    width: calc($size-large * 0.075);
+    height: calc($size-large * 0.225);
 }
 
 .lds-spinner div:nth-child(1) {

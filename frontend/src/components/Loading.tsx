@@ -15,7 +15,7 @@ function Loading(props: PropsWithChildren<LoadingProps>) {
                 {props.children}
                 <div className="loading-overlay" style={props.style}>
                     <div>
-                        <Spinner></Spinner>
+                        <Spinner size="small"></Spinner>
                         <div>Loading...</div>
                     </div>
                 </div>

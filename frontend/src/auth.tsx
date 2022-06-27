@@ -65,7 +65,17 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    return loading ? <Spinner></Spinner> : <AuthContext.Provider value={authProvider}>{children}</AuthContext.Provider>;
+    const loadingScreen = (
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", height: "100vh" }}>
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <span style={{ fontSize: "40px", marginBottom: "20px" }}>Loading...</span>
+                <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+                    <Spinner size="large"></Spinner></div>
+            </div>
+        </div>
+    );
+
+    return loading ? loadingScreen : <AuthContext.Provider value={authProvider}>{children}</AuthContext.Provider>;
 }
 
 function RequireAuth({ fallback, children }: { fallback: ReactNode, children: ReactNode }) {
