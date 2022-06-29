@@ -32,12 +32,12 @@
     flex-grow: 1;
 }
 
-.footer-spacer {
-    flex-grow: 1;
+.app-content {
+    display: flex;
+    flex-direction: column;
 }
 
 .page-footer {
-    margin: 20px 0px 0px 0px;
     padding: 20px 10%;
     color: #fff;
     background-color: #444;

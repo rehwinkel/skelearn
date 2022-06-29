@@ -7,7 +7,7 @@ import IconButton from './components/IconButton';
 import Home from './pages/Home';
 import Login from './pages/Login';
 
-import { Link, Redirect, Route, Switch } from "wouter";
+import { Link, Redirect, Route, Switch, useLocation } from "wouter";
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
@@ -25,6 +25,8 @@ function HomeOrLogin() {
 }
 
 function App() {
+    let [location, _] = useLocation();
+
     return (
         <AuthProvider>
             <div className="page-container">
@@ -36,7 +38,7 @@ function App() {
                     <div className="app-bar-spacer"></div>
                     <HomeOrLogin></HomeOrLogin>
                 </div>
-                <div className='content'>
+                <div className='app-content' style={{ flexGrow: location === "/" ? 1 : 0 }}>
                     <Switch>
                         <Route path="/" ><Home /></Route>
                         <Route path="/login" ><Login /></Route>
@@ -45,7 +47,7 @@ function App() {
                         <Route path="/:rest"><Redirect to="/" /></Route>
                     </Switch>
                 </div>
-                <div className='footer-spacer'></div>
+                <div style={{ flexGrow: location === "/" ? 0 : 1 }}></div>
                 <div className='page-footer'>
                     Copyright oder sowas, außerdem haben wir ein Impressum (impressive, I know).
                 </div>
