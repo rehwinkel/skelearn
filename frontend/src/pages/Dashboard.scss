@@ -20,7 +20,24 @@
 
 .dashboard-section-title {
     display: block;
+    margin-top: 32px;
     margin-bottom: 8px;
     font-size: 18px;
     color: $text-color;
+}
+
+.dashboard-mode-buttons {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+
+    * {
+        flex: 1 1 0;
+    }
+}
+
+.dashboard-test-settings {
+    display: flex;
+    flex-direction: column;
+    row-gap: 16px;
 }
