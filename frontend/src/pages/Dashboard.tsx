@@ -6,6 +6,7 @@ import { mdiPencil } from "@mdi/js";
 import Button from "../components/Button";
 import { useState } from "react";
 import Check from "../components/Check";
+import ProgressBar from "../components/ProgressBar";
 
 enum TestMode {
     SpacedRep,
@@ -22,6 +23,12 @@ function Dashboard() {
                 <div style={{ textAlign: "center" }}>
                     <span className="card-title">Lernfortschritt</span>
                 </div>
+                <span className="dashboard-section-title">Spaced-Rep. (90%)</span>
+                <ProgressBar progress={0.9}></ProgressBar>
+                <span className="dashboard-section-title">Timer (5%)</span>
+                <ProgressBar progress={0.05}></ProgressBar>
+                <span className="dashboard-section-title">Prüfung (51%)</span>
+                <ProgressBar progress={0.51}></ProgressBar>
             </Card>
             <Card loading={false}>
                 <div style={{ textAlign: "center" }}>
