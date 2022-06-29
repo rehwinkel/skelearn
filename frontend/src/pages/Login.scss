@@ -3,20 +3,17 @@
 .login-buttons {
     display: flex;
     flex-direction: row;
-    column-gap: 10px;
+    column-gap: 16px;
+
+    * {
+        flex: 1 1 0;
+    }
 }
 
 .login-form {
     display: flex;
     flex-direction: column;
-    row-gap: 10px;
-}
-
-.login-title {
-    display: block;
-    font-size: 40px;
-    color: $text-color;
-    margin-bottom: 20px;
+    row-gap: 16px;
 }
 
 .login-content {

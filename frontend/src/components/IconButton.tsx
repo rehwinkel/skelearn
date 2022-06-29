@@ -18,7 +18,7 @@ function IconButton(props: IconButtonProps) {
     let { inverted = false, color = "primary", size = "small", icon = mdiPlusThick } = props;
     return (
         <button className={"icon-button-base icon-button-" + color + (inverted ? "-inverted" : "") + " icon-button-" + size} onClick={props.onClick}>
-            <Icon size={size === "large" ? 1.333 : 1} path={icon} color={colors[color + (inverted ? "" : "-text") + "-color"]}></Icon>
+            <Icon size={size === "large" ? 1.333 : 1.08} path={icon} color={colors[color + (inverted ? "" : "-text") + "-color"]}></Icon>
         </button>
     );
 }

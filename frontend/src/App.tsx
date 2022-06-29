@@ -1,7 +1,7 @@
 import './App.scss';
 import logo from "./logo.svg";
 
-import { mdiAccount } from '@mdi/js'
+import { mdiAccount, mdiHome } from '@mdi/js'
 import IconButton from './components/IconButton';
 
 import Home from './pages/Home';
@@ -10,10 +10,21 @@ import Login from './pages/Login';
 import { Link, Redirect, Route, Switch } from "wouter";
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import { AuthProvider, RequireAuth } from './auth';
+import { AuthProvider, RequireAuth, useAuth } from './auth';
+
+function HomeOrLogin() {
+    let auth = useAuth();
+
+    let isHome = !!auth.session.token;
+
+    return (
+        <Link to={isHome ? "/dashboard" : "/login"}>
+            <IconButton inverted={true} color="primary" size="small" icon={isHome ? mdiHome : mdiAccount} onClick={() => { }}></IconButton>
+        </Link>
+    );
+}
 
 function App() {
-
     return (
         <AuthProvider>
             <div className="page-container">
@@ -23,9 +34,7 @@ function App() {
                         <div className="app-bar-title">Skelearn</div>
                     </Link>
                     <div className="app-bar-spacer"></div>
-                    <Link to={"/login"}>
-                        <IconButton inverted={true} color="primary" size="small" icon={mdiAccount} onClick={() => { }}></IconButton>
-                    </Link>
+                    <HomeOrLogin></HomeOrLogin>
                 </div>
                 <div className='content'>
                     <Switch>

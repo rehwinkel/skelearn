@@ -13,17 +13,19 @@ function Input(props: InputProps) {
     let { type = "text" } = props;
 
     return (
-        <div className="container" style={props.style}>
-            {props.placeholder ? <span className={"placeholder" + (accessed ? " placeholder-moved" : "")}>{props.placeholder}</span> : null}
-            <input type={type} className="input-field"
-                onFocus={() => {
-                    setAccessed(true);
-                }}
-                onBlur={(e) => {
-                    setAccessed(!!e.target.value);
-                }}
-                onChange={props.onChanged}
-            />
+        <div>
+            <div className="input-container-inner" style={props.style}>
+                {props.placeholder ? <span className={"placeholder" + (accessed ? " placeholder-moved" : "")}>{props.placeholder}</span> : null}
+                <input type={type} className="input-field"
+                    onFocus={() => {
+                        setAccessed(true);
+                    }}
+                    onBlur={(e) => {
+                        setAccessed(!!e.target.value);
+                    }}
+                    onChange={props.onChanged}
+                />
+            </div>
         </div>
     );
 }

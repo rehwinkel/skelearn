@@ -1,0 +1,26 @@
+@import "../colors.module.scss";
+
+.dashboard-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 5%;
+    justify-content: center;
+    margin: 0px 5%;
+
+    div {
+        flex: 1 1 0;
+    }
+}
+
+.dashboard-categories {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+}
+
+.dashboard-section-title {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: $text-color;
+}

@@ -1,0 +1,24 @@
+@import "../colors.module.scss";
+
+.select-container {
+    display: flex;
+}
+
+.select-field {
+    border: 1px solid darken($primary-text-color, 20%);
+    border-radius: 16px;
+    padding: 16px 12px;
+    font-size: 16px;
+    font-family: inherit;
+    flex-grow: 1;
+    display: block;
+    background-color: #f0f0f0;
+}
+
+.select-field:hover {
+    background-color: #e8e8e8;
+}
+
+.select-field:active {
+    background-color: #ddd;
+}
