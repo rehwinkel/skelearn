@@ -7,6 +7,7 @@ import Button from "../components/Button";
 import { useState } from "react";
 import Check from "../components/Check";
 import ProgressBar from "../components/ProgressBar";
+import { Link } from "wouter";
 
 enum TestMode {
     SpacedRep,
@@ -40,7 +41,9 @@ function Dashboard() {
                     <IconButton icon={mdiPencil} onClick={() => { }}></IconButton>
                 </div>
                 <span className="dashboard-section-title">Lernmodus</span>
-                <Button size="large" onClick={() => { }}>Jetzt loslernen</Button>
+                <Link to="/learn">
+                    <Button size="large" onClick={() => { }}>Jetzt loslernen</Button>
+                </Link>
                 <span className="dashboard-section-title">Abfragemodus</span>
                 <div className="dashboard-test-settings">
                     <div className="dashboard-mode-buttons">

@@ -14,7 +14,7 @@ function getImageDimensions(src: any): Promise<{ width: number, height: number }
     });
 }
 
-function ZoomImage({ src }: { src: any }) {
+function ZoomImage({ src, position }: { src: any, position?: { x: number, y: number, size: number } }) {
     let container: RefObject<HTMLDivElement> = useRef(null);
     let [containerWidth, setContainerWidth] = useState(0);
     let [containerHeight, setContainerHeight] = useState(0);
@@ -40,8 +40,18 @@ function ZoomImage({ src }: { src: any }) {
     });
 
     useEffect(() => {
-        setXOffset(containerWidth / 2 - (userScale * scale * containerWidth) / 2);
-    }, [setXOffset, containerWidth]);
+        if (position) {
+            let new_user_scale = imageHeight / (2 * position.size);
+            let scaled_img_width = (new_user_scale * scale * containerWidth);
+            let scaled_img_height = imageHeight / imageWidth * (new_user_scale * scale * containerWidth);
+            setUserScale(new_user_scale);
+            setXOffset(containerWidth / 2 - (position.x / imageWidth * scaled_img_width));
+            setYOffset(containerHeight / 2 - (position.y / imageHeight * scaled_img_height));
+        } else {
+            let scaled_img_width = (userScale * scale * containerWidth);
+            setXOffset(containerWidth / 2 - scaled_img_width / 2);
+        }
+    }, [setYOffset, setXOffset, setUserScale, position, containerWidth, containerHeight, imageHeight, imageWidth, scale]);
 
     useEffect(() => {
         const imgDims = async () => {
