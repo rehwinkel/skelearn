@@ -1,0 +1,21 @@
+.zoom-image-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    border-radius: 16px;
+    background-color: black;
+    user-select: none;
+    overflow: hidden;
+
+    * {
+        pointer-events: none;
+        position: absolute;
+    }
+}
+
+.zoom-image-border {
+    height: 100%;
+    width: 100%;
+    border: 4px solid #555;
+    border-radius: 20px;
+}

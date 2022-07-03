@@ -11,6 +11,7 @@ import { Link, Redirect, Route, Switch, useLocation } from "wouter";
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
+import Learn from './pages/Learn';
 
 function HomeOrLogin() {
     let auth = useAuth();
@@ -44,6 +45,7 @@ function App() {
                         <Route path="/login" ><Login /></Route>
                         <Route path="/register" ><Register /></Route>
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
+                        <Route path="/learn" ><RequireAuth fallback={<Redirect to="/login" />}><Learn /></RequireAuth></Route>
                         <Route path="/:rest"><Redirect to="/" /></Route>
                     </Switch>
                 </div>
