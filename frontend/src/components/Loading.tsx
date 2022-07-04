@@ -1,19 +1,14 @@
 import "./Loading.scss";
 
-import { CSSProperties, PropsWithChildren } from "react";
+import { CSSProperties, ReactNode } from "react";
 import Spinner from "./Spinner";
 
-interface LoadingProps {
-    loading: boolean,
-    style?: CSSProperties
-}
-
-function Loading(props: PropsWithChildren<LoadingProps>) {
-    if (props.loading) {
+function Loading({ loading, children, style }: { loading: boolean, children: ReactNode, style?: CSSProperties }) {
+    if (loading) {
         return (
             <div className="loading-container">
-                {props.children}
-                <div className="loading-overlay" style={props.style}>
+                {children}
+                <div className="loading-overlay" style={style}>
                     <div>
                         <Spinner size="small"></Spinner>
                         <div>Loading...</div>
@@ -22,7 +17,7 @@ function Loading(props: PropsWithChildren<LoadingProps>) {
             </div>
         );
     } else {
-        return <>{props.children}</>;
+        return <>{children}</>;
     }
 }
 

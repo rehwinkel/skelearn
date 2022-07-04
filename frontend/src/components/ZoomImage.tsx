@@ -9,7 +9,7 @@ function getImageDimensions(src: any): Promise<{ width: number, height: number }
             resolve({ width: img.naturalWidth, height: img.naturalHeight });
         };
         img.onerror = () => {
-            reject("Invalid image src");
+            reject("Invalid image src: " + src);
         };
     });
 }
@@ -32,7 +32,11 @@ function ZoomImage({ src, position }: { src: any, position?: { x: number, y: num
         let oldImageAspect = imageHeight ? imageWidth / imageHeight : 0;
         let imgAspect = imgHeight ? (imgWidth || 0) / imgHeight : oldImageAspect;
         let aspect = container.current?.offsetHeight! / container.current?.offsetWidth!;
-        setScale(imgAspect * aspect);
+        if (imgAspect > 1) {
+            setScale(1);
+        } else {
+            setScale(imgAspect * aspect);
+        }
     }
 
     const ro = new ResizeObserver(() => {
@@ -41,15 +45,25 @@ function ZoomImage({ src, position }: { src: any, position?: { x: number, y: num
 
     useEffect(() => {
         if (position) {
-            let new_user_scale = imageHeight / (2 * position.size);
-            let scaled_img_width = (new_user_scale * scale * containerWidth);
-            let scaled_img_height = imageHeight / imageWidth * (new_user_scale * scale * containerWidth);
+            let new_user_scale;
+            if (imageWidth < imageHeight) {
+                new_user_scale = imageHeight / (2 * position.size);
+            } else {
+                new_user_scale = imageWidth / (2 * position.size);
+            }
             setUserScale(new_user_scale);
+            let scaled_img_width = (new_user_scale * scale * containerWidth);
+            let scaled_img_height = imageHeight / imageWidth * scaled_img_width;
             setXOffset(containerWidth / 2 - (position.x / imageWidth * scaled_img_width));
             setYOffset(containerHeight / 2 - (position.y / imageHeight * scaled_img_height));
         } else {
             let scaled_img_width = (userScale * scale * containerWidth);
-            setXOffset(containerWidth / 2 - scaled_img_width / 2);
+            if (imageWidth < imageHeight) {
+                setXOffset(containerWidth / 2 - scaled_img_width / 2);
+            } else {
+                let scaled_img_height = imageHeight / imageWidth * scaled_img_width;
+                setYOffset(containerHeight / 2 - scaled_img_height / 2);
+            }
         }
     }, [setYOffset, setXOffset, setUserScale, position, containerWidth, containerHeight, imageHeight, imageWidth, scale]);
 
@@ -61,7 +75,7 @@ function ZoomImage({ src, position }: { src: any, position?: { x: number, y: num
             handleResize(width, height);
         };
         imgDims();
-    }, [setImageWidth, setImageHeight, getImageDimensions]);
+    }, [src, setImageWidth, setImageHeight, getImageDimensions]);
 
     useEffect(() => {
         const toObserve = container.current!;
@@ -93,10 +107,43 @@ function ZoomImage({ src, position }: { src: any, position?: { x: number, y: num
         let cornerOffsetY = e.layerY - yOffset;
         let deltaOffsetX = cornerOffsetX / imgWidth * -(newImgWidth - imgWidth);
         let deltaOffsetY = cornerOffsetY / imgHeight * -(newImgHeight - imgHeight);
-        setXOffset(xOffset + deltaOffsetX);
-        setYOffset(yOffset + deltaOffsetY);
 
-        setUserScale(userScale - scaledScroll);
+        let newUserScale;
+        let newOffsetX = xOffset;
+        let newOffsetY = yOffset;
+        if (userScale - scaledScroll < 1) {
+            setUserScale(1);
+            newUserScale = 1;
+        } else {
+            setXOffset(xOffset + deltaOffsetX);
+            setYOffset(yOffset + deltaOffsetY);
+            setUserScale(userScale - scaledScroll);
+            newOffsetX = xOffset + deltaOffsetX;
+            newOffsetY = yOffset + deltaOffsetY;
+            newUserScale = userScale - scaledScroll;
+        }
+
+        imgWidth = newUserScale * scale * containerWidth;
+        imgHeight = (imgWidth / imageWidth) * imageHeight;
+        let topEdge = -newOffsetY;
+        let bottomEdge = imgHeight + newOffsetY - containerHeight;
+        let leftEdge = -newOffsetX;
+        let rightEdge = imgWidth + newOffsetX - containerWidth;
+        if (imgHeight > imgWidth) {
+            if (topEdge < 0) {
+                setYOffset(0);
+            }
+            if (bottomEdge < 0) {
+                setYOffset(newOffsetY - bottomEdge);
+            }
+        } else {
+            if (leftEdge < 0) {
+                setXOffset(0);
+            }
+            if (rightEdge < 0) {
+                setXOffset(newOffsetX - rightEdge);
+            }
+        }
     }
 
     return (
