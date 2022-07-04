@@ -4,7 +4,7 @@ import Button from "../components/Button";
 import colors from "../colors.module.scss";
 
 import { Link } from "wouter";
-
+//Hiiiiiiiiiiiiii
 function Home() {
     return (
         <div className="home-area">
