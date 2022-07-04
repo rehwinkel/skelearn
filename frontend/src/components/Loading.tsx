@@ -3,12 +3,12 @@ import "./Loading.scss";
 import { CSSProperties, ReactNode } from "react";
 import Spinner from "./Spinner";
 
-function Loading({ loading, children, style }: { loading: boolean, children: ReactNode, style?: CSSProperties }) {
+function Loading({ loading, children, outerStyle, overlayStyle }: { loading: boolean, children: ReactNode, outerStyle?: CSSProperties, overlayStyle?: CSSProperties }) {
     if (loading) {
         return (
-            <div className="loading-container">
+            <div className="loading-container" style={outerStyle}>
                 {children}
-                <div className="loading-overlay" style={style}>
+                <div className="loading-overlay" style={overlayStyle}>
                     <div>
                         <Spinner size="small"></Spinner>
                         <div>Loading...</div>

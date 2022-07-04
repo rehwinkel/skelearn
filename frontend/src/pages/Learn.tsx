@@ -55,11 +55,13 @@ function Learn() {
     ];
 
     useEffect(() => {
-        setCurrentStructure(structures[3]);
+        setTimeout(() => {
+            setCurrentStructure(structures[3]);
+        }, 1000);
     }, [setCurrentStructure]);
 
     return (
-        <Card style={{ width: "80%" }}>
+        <Card style={{ width: "80%" }} loading={currentStructure === null}>
             <div style={{ textAlign: "center" }}>
                 <span className="card-title">Lernmodus</span>
             </div>
