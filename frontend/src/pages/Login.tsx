@@ -7,7 +7,7 @@ import Alert from "../components/Alert";
 import { AuthResult, useAuth } from "../auth";
 import Card from "../components/Card";
 
-function Login() {
+function Login() { //Guten Tag
     let [_, setLocation] = useLocation();
     let auth = useAuth();
     let [loading, setLoading] = useState(false);
