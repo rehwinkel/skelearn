@@ -80,8 +80,10 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
             let scaled_img_width = (userScale * scale * containerWidth);
             if (imageWidth < imageHeight) {
                 setXOffset(containerWidth / 2 - scaled_img_width / 2);
+                setYOffset(0);
             } else {
                 let scaled_img_height = imageHeight / imageWidth * scaled_img_width;
+                setXOffset(0);
                 setYOffset(containerHeight / 2 - scaled_img_height / 2);
             }
         }
