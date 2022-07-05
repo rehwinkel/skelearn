@@ -78,8 +78,23 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
     }];
 }
 
+interface Category {
+    name: string,
+    elements: Array<string>,
+}
+
+async function apiGetCategories(): Promise<Array<Category>> {
+    return [
+        {
+            name: "Hauptknochen",
+            elements: ["Femur", "Handknochen", "Nasenknochen"]
+        }
+    ];
+}
+
 export {
     apiLogin,
     apiCheckToken,
     apiGetAnatomy,
+    apiGetCategories
 };

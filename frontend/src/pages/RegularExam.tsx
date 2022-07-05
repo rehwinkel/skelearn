@@ -4,7 +4,7 @@ import { useState, useEffect, ReactNode } from "react";
 import colors from "../colors.module.scss";
 import Card from "../components/Card";
 import ZoomImage from "../components/ZoomImage";
-import { apiGetAnatomy } from "../api";
+import { apiGetAnatomy, apiGetCategories } from "../api";
 import Button from "../components/Button";
 import { Link } from "wouter";
 import ProgressBar from "../components/ProgressBar";
@@ -192,6 +192,7 @@ function ResultItem({ first, last, status, children }: { first: boolean, last: b
     );
 }
 
+// TODO: save the progress
 function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure> }) {
     let correctPercentage = Math.floor(100.0 * (correct.length / (correct.length + wrong.length + slow.length)));
     let correctWithStatus = correct.map(e => { (e as any).status = "correct"; return e; });
@@ -248,7 +249,7 @@ function getNextMode(textMode: boolean, imageMode: boolean): ExamMode {
     return options[index];
 }
 
-function RegularExam({ textMode, imageMode, timed }: { textMode: boolean, imageMode: boolean, timed: boolean }) {
+function RegularExam({ textMode, imageMode, timed, category }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
     let [currentIndex, setCurrentIndex] = useState<number>(0);
     let currentStructure: AnatomicStructure = structures.length > 0 ? structures[currentIndex] : null!;
@@ -258,8 +259,11 @@ function RegularExam({ textMode, imageMode, timed }: { textMode: boolean, imageM
 
     useEffect(() => {
         const getInfo = async () => {
-            let rawData = await apiGetAnatomy();
-            setStructures(rawData.map(
+            let rawData = await apiGetAnatomy(); category
+            let categories = await apiGetCategories();
+            let foundCategory = categories.find(c => c.name === category)!;
+
+            setStructures(rawData.filter(elem => foundCategory.elements.includes(elem.name)).map(
                 elem => {
                     return {
                         centerX: elem.imgPosX,

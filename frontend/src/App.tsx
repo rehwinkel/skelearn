@@ -50,20 +50,20 @@ function App() {
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
                         <Route path="/learn" ><RequireAuth fallback={<Redirect to="/login" />}><Learn /></RequireAuth></Route>
                         <Route path="/impressum" ><Impressum /></Route>
-                        <Route path="/exam/regular/:txt/:img" >
+                        <Route path="/exam/regular/:category/:txt/:img" >
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <RegularExam timed={true} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RegularExam timed={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}
                         </Route>
-                        <Route path="/exam/real/:txt/:img" >
+                        <Route path="/exam/real/:category/:txt/:img" >
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <RealExam textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RealExam timed={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}
