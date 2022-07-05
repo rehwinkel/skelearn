@@ -12,8 +12,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
 import Learn from './pages/Learn';
-import TimedExam from './pages/TimedExam';
-import SpacedRepExam from './pages/SpacedRepExam';
+import RegularExam from './pages/RegularExam';
 import RealExam from './pages/RealExam';
 import Impressum from './pages/Impressum';
 
@@ -51,25 +50,16 @@ function App() {
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
                         <Route path="/learn" ><RequireAuth fallback={<Redirect to="/login" />}><Learn /></RequireAuth></Route>
                         <Route path="/impressum" ><Impressum /></Route>
-                        <Route path="/exam/spaced/:txt/:img" >
+                        <Route path="/exam/regular/:txt/:img" >
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <SpacedRepExam textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RegularExam timed={true} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}
                         </Route>
-                        <Route path="/exam/timed/:txt/:img" >
-                            {(params) => {
-                                return (
-                                    <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <TimedExam textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
-                                    </RequireAuth>
-                                );
-                            }}
-                        </Route>
-                        <Route path="/exam/:txt/:img" >
+                        <Route path="/exam/real/:txt/:img" >
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>

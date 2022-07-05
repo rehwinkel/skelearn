@@ -1,6 +1,8 @@
 import { ForwardedRef, forwardRef, MouseEvent, RefObject, useEffect, useRef, useState } from "react";
 import "./ZoomImage.scss";
 import colorAlpha from "color-alpha";
+import IconButton from "./IconButton";
+import { mdiArrowCollapse } from "@mdi/js";
 
 function getImageDimensions(src: any): Promise<{ width: number, height: number }> {
     return new Promise((resolve, reject) => {
@@ -40,6 +42,7 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
     let [imageWidth, setImageWidth] = useState(0);
     let [imageHeight, setImageHeight] = useState(0);
     let [dragging, setDragging] = useState(false);
+    let [recenter, setRecenter] = useState(0);
 
     let [markers, setMarkers] = useState<Array<HoverMarker>>(pMarkers ? pMarkers.map(m => {
         let nm: HoverMarker = { hovered: false, ...m };
@@ -87,7 +90,7 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
                 setYOffset(containerHeight / 2 - scaled_img_height / 2);
             }
         }
-    }, [setYOffset, setXOffset, setUserScale, position, containerWidth, containerHeight, imageHeight, imageWidth, scale]);
+    }, [setYOffset, setXOffset, setUserScale, position, containerWidth, containerHeight, imageHeight, imageWidth, scale, recenter]);
 
     useEffect(() => {
         const imgDims = async () => {
@@ -211,7 +214,7 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
                                     ));
                                 }}
                                 style={{
-                                    backgroundColor: marker.hovered ? colorAlpha(marker.markerColor, 0.2) : undefined,
+                                    backgroundColor: colorAlpha(marker.markerColor, marker.hovered ? 0.4 : 0.2),
                                     left: markerPosX,
                                     top: markerPosY,
                                     width: markerSize,
@@ -224,6 +227,9 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
                         }
                     })
                 }
+                <div style={{ position: "absolute", right: "8px", top: "8px", zIndex: 20 }}>
+                    <IconButton icon={mdiArrowCollapse} onClick={() => { setUserScale(1); setRecenter(recenter + 1); }}></IconButton>
+                </div>
             </div>
         </div>
     );

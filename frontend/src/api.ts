@@ -1,4 +1,5 @@
 import goofySkeleton from "./goofy-skeleton.png";
+import accurateSkeleton from "./accurate-skeleton.png";
 
 const endpoint = "http://localhost:8080/api/v1";
 
@@ -65,6 +66,15 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         name: "Handknochen",
         description: "Der Hand ist ein nonexistenter Knochen in der Nase.",
         tip: "Die Hand ist im Gesicht"
+    }, {
+        imgPosX: 730,
+        imgPosY: 1130,
+        selectionRadius: 60,
+        radius: 125,
+        img: accurateSkeleton,
+        name: "Femur",
+        description: "Der Femur ist im Leg.",
+        tip: "Femur ist halt Oberschenkel."
     }];
 }
 

@@ -1,11 +1,9 @@
-import Card from "../components/Card";
 import "./Learn.scss";
 
-import accurateSkel from "../accurate-skeleton.png";
-import accurateSkelSide from "../accurate-skeleton-side.png";
-import IconButton from "../components/IconButton";
-import { mdiArrowCollapse, mdiArrowLeft, mdiArrowRight } from "@mdi/js";
+import Card from "../components/Card";
 import ZoomImage from "../components/ZoomImage";
+import IconButton from "../components/IconButton";
+import { mdiArrowLeft, mdiArrowRight } from "@mdi/js";
 import { useEffect, useReducer, useState } from "react";
 import { apiGetAnatomy } from "../api";
 
@@ -21,8 +19,6 @@ interface AnatomicStructure {
 function Learn() {
     let [currentIndex, setCurrentIndex] = useState<number>(0);
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
-
 
     useEffect(() => {
         const getInfo = async () => {
@@ -72,7 +68,6 @@ function Learn() {
                                 {currentStructure?.description || "Loading..."}
                             </p>
                         </div>
-                        <IconButton icon={mdiArrowCollapse} onClick={() => { forceUpdate(); }}></IconButton>
                     </div>
                     <div className="learn-button-spacer"></div>
                     <div className="learn-buttons">

@@ -10,14 +10,13 @@ import ProgressBar from "../components/ProgressBar";
 import { Link, useLocation } from "wouter";
 
 enum ExamMode {
-    SpacedRep,
-    Timed,
-    Test,
+    Regular,
+    Real,
 }
 
 function Dashboard() {
     let [_, setLocation] = useLocation();
-    let [mode, setMode] = useState<ExamMode>(ExamMode.SpacedRep);
+    let [mode, setMode] = useState<ExamMode>(ExamMode.Regular);
     let [imageMode, setImageMode] = useState<boolean>(false);
     let [textMode, setTextMode] = useState<boolean>(false);
 
@@ -50,16 +49,14 @@ function Dashboard() {
                 <span className="dashboard-section-title">Abfragemodus</span>
                 <div className="dashboard-test-settings">
                     <div className="dashboard-mode-buttons">
-                        <Button color="accent" inverted={mode !== ExamMode.SpacedRep} onClick={() => { setMode(ExamMode.SpacedRep) }}>Spaced-Rep.</Button>
-                        <Button color="accent" inverted={mode !== ExamMode.Timed} onClick={() => { setMode(ExamMode.Timed) }}>Timer</Button>
-                        <Button color="accent" inverted={mode !== ExamMode.Test} onClick={() => { setMode(ExamMode.Test) }}>Prüfung</Button>
+                        <Button color="accent" inverted={mode !== ExamMode.Regular} onClick={() => { setMode(ExamMode.Regular) }}>Regulär</Button>
+                        <Button color="accent" inverted={mode !== ExamMode.Real} onClick={() => { setMode(ExamMode.Real) }}>Prüfung</Button>
                     </div>
                     <Check onToggle={() => { setImageMode(!imageMode); }}>Knochen benennen</Check>
                     <Check onToggle={() => { setTextMode(!textMode); }}>Knochen identifizieren</Check>
                 </div>
                 <Button style={{ marginTop: "16px" }} size="large" onClick={() => {
-                    let path = (mode === ExamMode.SpacedRep ? "/exam/spaced" :
-                        (mode === ExamMode.Timed ? "/exam/timed" : "/exam")) + "/"
+                    let path = (mode === ExamMode.Regular ? "/exam/regular" : "/exam/real") + "/"
                         + (imageMode ? "yes" : "no") + "img" + "/"
                         + (textMode ? "yes" : "no") + "txt";
                     console.log(path);
