@@ -83,7 +83,9 @@ function App() {
                 </div>
                 <div style={{ flexGrow: location === "/" ? 0 : 1 }}></div>
                 <div className='page-footer'>
-                    Copyright oder sowas, außerdem haben wir ein Impressum (impressive, I know).
+                    <span>Copyright © 2022 by Ian Rehwinkel & Ikram Idderhem</span>
+                    <span style={{ flexGrow: 1 }}></span>
+                    <Link to="/impressum" style={{ color: "white", textDecorationLine: 'underline' }}>Impressum</Link>
                 </div>
             </div>
         </AuthProvider>
