@@ -8,8 +8,9 @@ import { apiGetAnatomy } from "../api";
 import Button from "../components/Button";
 import { Link } from "wouter";
 import ProgressBar from "../components/ProgressBar";
-import { mdiCheckAll, mdiCheckCircle, mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiCrossOutline } from "@mdi/js";
+import { mdiCheckAll, mdiCheckCircle, mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiCrossOutline, mdiInformation, mdiInformationOutline } from "@mdi/js";
 import Icon from "@mdi/react";
+import IconButton from "../components/IconButton";
 
 interface AnatomicStructure {
     centerX: number,
@@ -68,6 +69,8 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
         }
     );
 
+    let [showHint, setShowHint] = useState(false);
+
     return (
         <div className="learn-container">
             <div style={{ height: "max(300px, calc(100vh - 370px))", flexGrow: 2 }}>
@@ -78,8 +81,11 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
             <div className="learn-right">
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
-                        <span className="learn-title">Klicke auf den {currentStructure?.title}</span>
-                        <div>Tipp: {currentStructure?.tip}</div>
+                        <span className="exam-prompt">Klicke auf den: <br /> <b>{currentStructure?.title}</b></span>
+                        <div className="exam-hint-container">
+                            <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
+                            {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
+                        </div>
                     </div>
                 </div>
                 <div className="learn-button-spacer"></div>

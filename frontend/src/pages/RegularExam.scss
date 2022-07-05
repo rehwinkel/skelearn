@@ -1,5 +1,17 @@
 @import "../colors.module.scss";
 
+.exam-prompt {
+    font-size: 32px;
+}
+
+.exam-hint-container {
+    margin: 16px 0px;
+
+    div {
+        margin-top: 32px;
+    }
+}
+
 .timer-text {
     display: flex;
     flex-direction: row;
