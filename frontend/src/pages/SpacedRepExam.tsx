@@ -5,6 +5,8 @@ import Card from "../components/Card";
 import IconButton from "../components/IconButton";
 import ZoomImage from "../components/ZoomImage";
 import { apiGetAnatomy } from "../api";
+import Button from "../components/Button";
+import { Link } from "wouter";
 
 interface AnatomicStructure {
     centerX: number,
@@ -12,6 +14,7 @@ interface AnatomicStructure {
     radius: number,
     title: string,
     img: any,
+    tip: string,
     key: string,
 }
 
@@ -49,6 +52,7 @@ function QuestionImage({ structures, currentStructure, onSuccess, onFailure }: {
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
                         <span className="learn-title">Klicke auf den {currentStructure?.title}</span>
+                        <div>Tipp: {currentStructure?.tip}</div>
                     </div>
                     <IconButton icon={mdiArrowCollapse} onClick={() => { forceUpdate(); }}></IconButton>
                 </div>
@@ -65,25 +69,41 @@ function QuestionText() {
     return <div>FUCK YOU</div>;
 }
 
-function Correct() {
+function Correct({ next }: { next: (e: any) => void }) {
     return (
         <div>
             Das ist sau richtig Bro!
+            <Button onClick={next}>Nächste</Button>
         </div>
     );
 }
 
-function Wrong() {
+function Wrong({ next }: { next: (e: any) => void }) {
     return (
         <div>
             Du dummer Bastard!
+            <Button onClick={next}>Nächste</Button>
         </div>
     );
 }
 
-enum QuestionMode {
-    Image,
-    Text,
+function Finished() {
+    return (
+        <div>
+            Finished
+            <Link to="/dashboard">
+                <Button onClick={() => { }}>Go Home sad :(</Button>
+            </Link>
+        </div>
+    );
+}
+
+enum ExamMode {
+    AskImage,
+    AskText,
+    Failure,
+    Success,
+    Finished,
 }
 
 function SpacedRepExam({ textMode, imageMode }: { textMode: boolean, imageMode: boolean }) {
@@ -91,9 +111,7 @@ function SpacedRepExam({ textMode, imageMode }: { textMode: boolean, imageMode: 
     let [currentIndex, setCurrentIndex] = useState<number>(0);
     let currentStructure: AnatomicStructure = structures.length > 0 ? structures[currentIndex] : null!;
 
-    let [questioning, setQuestioning] = useState(true);
-    let [questionMode, setQuestionMode] = useState(QuestionMode.Image);
-    let [correct, setCorrect] = useState(false);
+    let [mode, setMode] = useState(ExamMode.AskImage);
 
     useEffect(() => {
         const getInfo = async () => {
@@ -107,6 +125,7 @@ function SpacedRepExam({ textMode, imageMode }: { textMode: boolean, imageMode: 
                         title: elem.name,
                         img: elem.img,
                         key: elem.name,
+                        tip: elem.tip,
                     };
                 }
             ));
@@ -114,30 +133,45 @@ function SpacedRepExam({ textMode, imageMode }: { textMode: boolean, imageMode: 
         getInfo();
     }, [setStructures]);
 
+    function askNext() {
+        if (currentIndex + 1 === structures.length) {
+            setMode(ExamMode.Finished);
+        } else {
+            setMode(ExamMode.AskImage); // TODO: ask text too
+            setCurrentIndex(currentIndex + 1);
+        }
+    }
+
     return (
         <Card style={{ width: "60%" }} loading={structures.length === 0}>
             <div style={{ textAlign: "center" }}>
                 <span className="card-title">Spaced-Repetition</span>
             </div>
-            {
-                questioning ? (
-                    questionMode === QuestionMode.Image ?
-                        <QuestionImage structures={structures}
-                            currentStructure={currentStructure}
-                            onSuccess={() => {
-                                setQuestioning(false);
-                                setCorrect(true);
-                            }}
-                            onFailure={() => {
-                                setQuestioning(false);
-                                setCorrect(false);
-                            }} /> :
-                        <QuestionText />
-                ) : (
-                    correct ? <Correct /> : <Wrong />
-                )
-            }
-
+            <div>
+                {
+                    (() => {
+                        switch (mode) {
+                            case ExamMode.AskImage:
+                                return <QuestionImage structures={structures}
+                                    currentStructure={currentStructure}
+                                    onSuccess={() => {
+                                        setMode(ExamMode.Success);
+                                    }}
+                                    onFailure={() => {
+                                        setMode(ExamMode.Failure);
+                                    }} />;
+                            case ExamMode.AskText:
+                                return <QuestionText />;
+                            case ExamMode.Success:
+                                return <Correct next={askNext} />;
+                            case ExamMode.Failure:
+                                return <Wrong next={askNext} />;
+                            case ExamMode.Finished:
+                                return <Finished />;
+                        }
+                    })()
+                }
+            </div>
         </Card>
     );
 }

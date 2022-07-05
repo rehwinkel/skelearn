@@ -7,6 +7,7 @@ import IconButton from "../components/IconButton";
 import { mdiArrowCollapse, mdiArrowLeft, mdiArrowRight } from "@mdi/js";
 import ZoomImage from "../components/ZoomImage";
 import { useEffect, useReducer, useState } from "react";
+import { apiGetAnatomy } from "../api";
 
 interface AnatomicStructure {
     centerX: number,
@@ -24,42 +25,22 @@ function Learn() {
 
 
     useEffect(() => {
-        setTimeout(() => {
-            setStructures([
-                {
-                    centerX: 730,
-                    centerY: 1130,
-                    radius: 125,
-                    title: "Femur",
-                    description: "Der <b>Femur</b> ist der geilste Knochen im Oberschenkel.\nEr besteht aus Knochen.",
-                    img: accurateSkel,
-                },
-                {
-                    centerX: 215,
-                    centerY: 570,
-                    radius: 105,
-                    title: "Humerus",
-                    description: "Der Humerus, auch als LMAO-Knochen bekannt, kostet etwa 6,50€.",
-                    img: accurateSkel,
-                },
-                {
-                    centerX: 290,
-                    centerY: 540,
-                    radius: 210,
-                    title: "Skull",
-                    description: "Das ist halt einfach ein Kopf du Dickschädel.",
-                    img: accurateSkelSide,
-                },
-                {
-                    centerX: 300,
-                    centerY: 510,
-                    radius: 15,
-                    title: "Tear",
-                    description: "Sad :(",
-                    img: accurateSkelSide,
+        const getInfo = async () => {
+            let rawData = await apiGetAnatomy();
+            setStructures(rawData.map(
+                elem => {
+                    return {
+                        centerX: elem.imgPosX,
+                        centerY: elem.imgPosY,
+                        radius: elem.radius,
+                        title: elem.name,
+                        description: elem.description,
+                        img: elem.img
+                    };
                 }
-            ]);
-        }, 1000);
+            ));
+        };
+        getInfo();
     }, [setStructures]);
 
     let currentStructure = structures.length > 0 ? structures[currentIndex] : null;
