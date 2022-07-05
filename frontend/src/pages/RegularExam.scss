@@ -12,6 +12,15 @@
     }
 }
 
+.exam-text-mode-submit {
+    display: flex;
+    flex-direction: row;
+    column-gap: 16px;
+    margin: 24px 0px;
+    align-items: center;
+    justify-content: center;
+}
+
 .timer-text {
     display: flex;
     flex-direction: row;

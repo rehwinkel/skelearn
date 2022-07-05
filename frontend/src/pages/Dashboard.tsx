@@ -8,6 +8,7 @@ import { useState } from "react";
 import Check from "../components/Check";
 import ProgressBar from "../components/ProgressBar";
 import { Link, useLocation } from "wouter";
+import Alert from "../components/Alert";
 
 enum ExamMode {
     Regular,
@@ -52,14 +53,19 @@ function Dashboard() {
                         <Button color="accent" inverted={mode !== ExamMode.Regular} onClick={() => { setMode(ExamMode.Regular) }}>Regulär</Button>
                         <Button color="accent" inverted={mode !== ExamMode.Real} onClick={() => { setMode(ExamMode.Real) }}>Prüfung</Button>
                     </div>
-                    <Check onToggle={() => { setImageMode(!imageMode); }}>Knochen benennen</Check>
-                    <Check onToggle={() => { setTextMode(!textMode); }}>Knochen identifizieren</Check>
+                    <Check onToggle={() => { setImageMode(!imageMode); }}>Knochen in Bild finden</Check>
+                    <Check onToggle={() => { setTextMode(!textMode); }}>Knochen benennen</Check>
                 </div>
+                {!imageMode && !textMode ?
+                    <div style={{ marginTop: "8px" }}>
+                        <Alert>Du musst mindestens eine Option wählen!</Alert>
+                    </div>
+                    : undefined}
                 <Button style={{ marginTop: "16px" }} size="large" onClick={() => {
+                    if (!imageMode && !textMode) return;
                     let path = (mode === ExamMode.Regular ? "/exam/regular" : "/exam/real") + "/"
-                        + (imageMode ? "yes" : "no") + "img" + "/"
-                        + (textMode ? "yes" : "no") + "txt";
-                    console.log(path);
+                        + (textMode ? "yes" : "no") + "txt" + "/"
+                        + (imageMode ? "yes" : "no") + "img";
                     setLocation(path);
                 }}>Jetzt abfragen</Button>
             </Card>

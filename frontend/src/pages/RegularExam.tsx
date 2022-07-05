@@ -11,6 +11,7 @@ import ProgressBar from "../components/ProgressBar";
 import { mdiCheckAll, mdiCheckCircle, mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiCrossOutline, mdiInformation, mdiInformationOutline } from "@mdi/js";
 import Icon from "@mdi/react";
 import IconButton from "../components/IconButton";
+import Input from "../components/Input";
 
 interface AnatomicStructure {
     centerX: number,
@@ -95,8 +96,53 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
     );
 }
 
-function QuestionText() {
-    return <div>FUCK YOU</div>;
+function testUserSubmission(structure: AnatomicStructure, name: string): boolean {
+    // TODO: expand possibly?
+    return structure.title.toLowerCase() === name.toLowerCase();
+}
+
+function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout }: { currentStructure?: AnatomicStructure, timed: boolean, onSuccess: () => void, onFailure: () => void, onTimeout: () => void }) {
+    let [showHint, setShowHint] = useState(false);
+    let [submission, setSubmission] = useState("");
+
+    return (
+        <div className="learn-container">
+            <div style={{ height: "max(300px, calc(100vh - 370px))", flexGrow: 2 }}>
+                <ZoomImage
+                    src={currentStructure?.img}
+                    position={currentStructure ? { x: currentStructure?.centerX, y: currentStructure?.centerY, size: currentStructure?.radius * 2 } : undefined} />
+            </div>
+            <div className="learn-right">
+                <div style={{ display: "flex" }}>
+                    <div style={{ flexGrow: 1 }}>
+                        <span className="exam-prompt">Was ist der Name des angezeigten Knochens?</span>
+                        <div className="exam-text-mode-submit">
+                            <Input onChanged={e => { setSubmission(e.target.value); }}></Input>
+                            <Button onClick={() => {
+                                if (testUserSubmission(currentStructure!, submission)) {
+                                    onSuccess();
+                                } else {
+                                    onFailure();
+                                }
+                            }}>Absenden</Button>
+                        </div>
+                        <div className="exam-hint-container">
+                            <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
+                            {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
+                        </div>
+                    </div>
+                </div>
+                <div className="learn-button-spacer"></div>
+                {timed ? <Timer timerSeconds={10} onElapsed={() => {
+                    if (testUserSubmission(currentStructure!, submission)) {
+                        onSuccess();
+                    } else {
+                        onTimeout();
+                    }
+                }} /> : null}
+            </div>
+        </div>
+    );
 }
 
 function Correct({ next }: { next: (e: any) => void }) {
@@ -189,12 +235,26 @@ enum ExamMode {
     Finished,
 }
 
-function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imageMode: boolean, timed: boolean }) {
+function getNextMode(textMode: boolean, imageMode: boolean): ExamMode {
+    let options = [];
+    if (textMode) {
+        options.push(ExamMode.AskText);
+    }
+    if (imageMode) {
+        options.push(ExamMode.AskImage);
+    }
+    let index = Math.round(Math.random() * (options.length - 1));
+    console.log(options, index);
+    return options[index];
+}
+
+function RegularExam({ textMode, imageMode, timed }: { textMode: boolean, imageMode: boolean, timed: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
     let [currentIndex, setCurrentIndex] = useState<number>(0);
     let currentStructure: AnatomicStructure = structures.length > 0 ? structures[currentIndex] : null!;
 
-    let [mode, setMode] = useState(ExamMode.AskImage);
+    console.log(textMode, imageMode);
+    let [mode, setMode] = useState(getNextMode(textMode, imageMode));
 
     useEffect(() => {
         const getInfo = async () => {
@@ -236,7 +296,7 @@ function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imag
         if (currentIndex + 1 === structures.length) {
             setMode(ExamMode.Finished);
         } else {
-            setMode(ExamMode.AskImage); // TODO: ask text too
+            setMode(getNextMode(textMode, imageMode));
             setCurrentIndex(currentIndex + 1);
         }
     }
@@ -267,7 +327,20 @@ function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imag
                                         setMode(ExamMode.Timeout);
                                     }} />;
                             case ExamMode.AskText:
-                                return <QuestionText />;
+                                return <QuestionText currentStructure={currentStructure}
+                                    timed={timed}
+                                    onSuccess={() => {
+                                        addCorrect(currentStructure);
+                                        setMode(ExamMode.Success);
+                                    }}
+                                    onFailure={() => {
+                                        addWrong(currentStructure);
+                                        setMode(ExamMode.Failure);
+                                    }}
+                                    onTimeout={() => {
+                                        addSlow(currentStructure);
+                                        setMode(ExamMode.Timeout);
+                                    }} />;
                             case ExamMode.Success:
                                 return <Correct next={askNext} />;
                             case ExamMode.Failure:
@@ -284,4 +357,4 @@ function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imag
     );
 }
 
-export default SpacedRepExam;
+export default RegularExam;
