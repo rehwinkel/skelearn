@@ -7,16 +7,19 @@ import Button from "../components/Button";
 import { useState } from "react";
 import Check from "../components/Check";
 import ProgressBar from "../components/ProgressBar";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
-enum TestMode {
+enum ExamMode {
     SpacedRep,
     Timed,
     Test,
 }
 
 function Dashboard() {
-    let [mode, setMode] = useState<TestMode>(TestMode.SpacedRep);
+    let [_, setLocation] = useLocation();
+    let [mode, setMode] = useState<ExamMode>(ExamMode.SpacedRep);
+    let [imageMode, setImageMode] = useState<boolean>(false);
+    let [textMode, setTextMode] = useState<boolean>(false);
 
     return (
         <div className="dashboard-container">
@@ -47,14 +50,21 @@ function Dashboard() {
                 <span className="dashboard-section-title">Abfragemodus</span>
                 <div className="dashboard-test-settings">
                     <div className="dashboard-mode-buttons">
-                        <Button color="accent" inverted={mode !== TestMode.SpacedRep} onClick={() => { setMode(TestMode.SpacedRep) }}>Spaced-Rep.</Button>
-                        <Button color="accent" inverted={mode !== TestMode.Timed} onClick={() => { setMode(TestMode.Timed) }}>Timer</Button>
-                        <Button color="accent" inverted={mode !== TestMode.Test} onClick={() => { setMode(TestMode.Test) }}>Prüfung</Button>
+                        <Button color="accent" inverted={mode !== ExamMode.SpacedRep} onClick={() => { setMode(ExamMode.SpacedRep) }}>Spaced-Rep.</Button>
+                        <Button color="accent" inverted={mode !== ExamMode.Timed} onClick={() => { setMode(ExamMode.Timed) }}>Timer</Button>
+                        <Button color="accent" inverted={mode !== ExamMode.Test} onClick={() => { setMode(ExamMode.Test) }}>Prüfung</Button>
                     </div>
-                    <Check onToggle={() => { }}>Knochen benennen</Check>
-                    <Check onToggle={() => { }}>Knochen identifizieren</Check>
+                    <Check onToggle={() => { setImageMode(!imageMode); }}>Knochen benennen</Check>
+                    <Check onToggle={() => { setTextMode(!textMode); }}>Knochen identifizieren</Check>
                 </div>
-                <Button style={{ marginTop: "16px" }} size="large" onClick={() => { }}>Jetzt abfragen</Button>
+                <Button style={{ marginTop: "16px" }} size="large" onClick={() => {
+                    let path = (mode === ExamMode.SpacedRep ? "/exam/spaced" :
+                        (mode === ExamMode.Timed ? "/exam/timed" : "/exam")) + "/"
+                        + (imageMode ? "yes" : "no") + "img" + "/"
+                        + (textMode ? "yes" : "no") + "txt";
+                    console.log(path);
+                    setLocation(path);
+                }}>Jetzt abfragen</Button>
             </Card>
         </div>
     );
