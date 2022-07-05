@@ -14,7 +14,7 @@ function Home() {
             <div className="content-area">
                 <span className="slogan">Learn bones - become a boner.</span>
                 <span className="disclaimer">
-                    Diese Webseite ist ausschließlich für Fortbildungszwecke zu verwenden. <Link to="/impressum" style={{}}>Genaueres hier.</Link>
+                    Diese Webseite ist ausschließlich für Fortbildungszwecke zu verwenden. <Link to="/impressum" style={{ color: "inherit", textDecorationLine: "underline" }}>Genaueres hier.</Link>
                 </span>
                 <Link to="/dashboard">
                     <Button size="large" color="accent" onClick={() => { }}>Jetzt loslegen!</Button>
