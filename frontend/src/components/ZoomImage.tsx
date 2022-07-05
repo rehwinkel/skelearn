@@ -1,5 +1,6 @@
 import { ForwardedRef, forwardRef, MouseEvent, RefObject, useEffect, useRef, useState } from "react";
 import "./ZoomImage.scss";
+import colorAlpha from "color-alpha";
 
 function getImageDimensions(src: any): Promise<{ width: number, height: number }> {
     return new Promise((resolve, reject) => {
@@ -14,7 +15,21 @@ function getImageDimensions(src: any): Promise<{ width: number, height: number }
     });
 }
 
-const ZoomImage = forwardRef(({ src, position }: { src: any, position?: { x: number, y: number, size: number } }, ref: ForwardedRef<HTMLDivElement>) => {
+interface Marker {
+    centerX: number,
+    centerY: number,
+    radius: number,
+    markerWidth: number,
+    markerColor: any,
+    clickable: boolean,
+    onClick: ((e: MouseEvent<HTMLDivElement>) => void) | null,
+}
+
+interface HoverMarker extends Marker {
+    hovered: boolean,
+}
+
+const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?: Array<Marker>, position?: { x: number, y: number, size: number } }, ref: ForwardedRef<HTMLDivElement>) => {
     let container: RefObject<HTMLDivElement> = useRef(null);
     let [containerWidth, setContainerWidth] = useState(0);
     let [containerHeight, setContainerHeight] = useState(0);
@@ -25,6 +40,11 @@ const ZoomImage = forwardRef(({ src, position }: { src: any, position?: { x: num
     let [imageWidth, setImageWidth] = useState(0);
     let [imageHeight, setImageHeight] = useState(0);
     let [dragging, setDragging] = useState(false);
+
+    let [markers, setMarkers] = useState<Array<HoverMarker>>(pMarkers ? pMarkers.map(m => {
+        let nm: HoverMarker = { hovered: false, ...m };
+        return nm;
+    }) : []);
 
     function handleResize(imgWidth?: number, imgHeight?: number) {
         setContainerWidth(container.current?.offsetWidth!);
@@ -146,10 +166,62 @@ const ZoomImage = forwardRef(({ src, position }: { src: any, position?: { x: num
         }
     }
 
+    const inImage = (v: number) => imageWidth ? (userScale * scale * containerWidth) * v / imageWidth : undefined;
+
     return (
         <div ref={ref} className="zoom-image-border">
             <div ref={container} className="zoom-image-container" style={{ cursor: dragging ? "grabbing" : "grab" }} onMouseMove={drag} onMouseDown={() => { setDragging(true); }} onMouseUp={() => { setDragging(false); }} onMouseLeave={() => { setDragging(false); }} >
                 <img style={{ width: userScale * scale * containerWidth, top: yOffset + "px", left: xOffset + "px" }} src={src} alt="Skelett"></img>
+                {
+                    markers.map(marker => {
+                        if (imageWidth) {
+                            let markerWidth = marker.markerWidth * userScale;
+                            let markerDiameter = marker.radius * 2;
+                            let markerSize = (userScale * scale * containerWidth - markerWidth * 2) * markerDiameter / imageWidth;
+                            let markerPosX = (xOffset || 0) + (inImage(marker.centerX - marker.radius) || 0);
+                            let markerPosY = (yOffset || 0) + (inImage(marker.centerY - marker.radius) || 0);
+                            return (<div className="marker"
+                                key={marker.centerX + "_" + marker.centerY}
+                                onClick={e => {
+                                    if (!marker.clickable) return;
+                                    marker.onClick!(e);
+                                }}
+                                onMouseEnter={() => {
+                                    if (!marker.clickable) return;
+                                    setMarkers(markers.map(
+                                        m => {
+                                            if (m.centerX === marker.centerX && m.centerY === marker.centerY) {
+                                                m.hovered = true;
+                                            }
+                                            return m;
+                                        }
+                                    ));
+                                }}
+                                onMouseLeave={() => {
+                                    if (!marker.clickable) return;
+                                    setMarkers(markers.map(
+                                        m => {
+                                            if (m.centerX === marker.centerX && m.centerY === marker.centerY) {
+                                                m.hovered = false;
+                                            }
+                                            return m;
+                                        }
+                                    ));
+                                }}
+                                style={{
+                                    backgroundColor: marker.hovered ? colorAlpha(marker.markerColor, 0.2) : undefined,
+                                    left: markerPosX,
+                                    top: markerPosY,
+                                    width: markerSize,
+                                    height: markerSize,
+                                    borderWidth: markerWidth,
+                                    borderColor: marker.markerColor
+                                }} />);
+                        } else {
+                            return null;
+                        }
+                    })
+                }
             </div>
         </div>
     );

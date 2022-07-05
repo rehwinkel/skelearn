@@ -1,5 +1,5 @@
 import { mdiArrowCollapse } from "@mdi/js";
-import { useReducer, useState } from "react";
+import { useReducer, useState, MouseEvent } from "react";
 import Card from "../components/Card";
 import IconButton from "../components/IconButton";
 import ZoomImage from "../components/ZoomImage";
@@ -19,10 +19,32 @@ function Question({ currentStructure }: { currentStructure?: AnatomicStructure }
 
     // TODO: let user click a place and check that, also let user name the structure
 
+    let markers = [
+        {
+            centerX: 1080 / 2,
+            centerY: 1920 / 2,
+            radius: 100,
+            markerWidth: 3,
+            markerColor: "#f00",
+            clickable: false,
+            onClick: null,
+        },
+        {
+            centerX: 1080 / 2,
+            centerY: 1920 / 2 - 200,
+            radius: 100,
+            markerWidth: 3,
+            markerColor: "#f0f",
+            clickable: false,
+            onClick: (e: MouseEvent<HTMLDivElement>) => { console.log(e, "yess") }
+        }
+    ];
+
     return (
         <div className="learn-container">
             <div style={{ height: "max(300px, calc(100vh - 370px))" }}>
                 <ZoomImage
+                    pMarkers={markers}
                     src={currentStructure?.img}
                     position={!!currentStructure ? {
                         x: currentStructure.centerX,
@@ -67,9 +89,9 @@ function Wrong() {
 
 function SpacedRepExam({ textMode, imageMode }: { textMode: boolean, imageMode: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([{
-        centerX: 0,
-        centerY: 0,
-        radius: 100,
+        centerX: 100,
+        centerY: 100,
+        radius: 200,
         title: "Flex",
         description: "Ein Flex auf dich!",
         img: accurateSkel

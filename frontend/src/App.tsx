@@ -15,6 +15,7 @@ import Learn from './pages/Learn';
 import TimedExam from './pages/TimedExam';
 import SpacedRepExam from './pages/SpacedRepExam';
 import RealExam from './pages/RealExam';
+import Impressum from './pages/Impressum';
 
 function HomeOrLogin() {
     let auth = useAuth();
@@ -49,6 +50,7 @@ function App() {
                         <Route path="/register" ><Register /></Route>
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
                         <Route path="/learn" ><RequireAuth fallback={<Redirect to="/login" />}><Learn /></RequireAuth></Route>
+                        <Route path="/impressum" ><Impressum /></Route>
                         <Route path="/exam/spaced/:txt/:img" >
                             {(params) => {
                                 return (
