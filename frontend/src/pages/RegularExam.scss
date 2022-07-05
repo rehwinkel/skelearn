@@ -1,4 +1,46 @@
+@import "../colors.module.scss";
+
 .timer-text {
     display: flex;
     flex-direction: row;
+}
+
+.exam-results {
+    font-size: 20px;
+}
+
+.result-back-home {
+    display: flex;
+    flex-direction: row;
+    margin-top: 32px;
+}
+
+.result-list-title {
+    font-size: 32px;
+    margin-bottom: 16px;
+    display: block;
+    width: 80%;
+}
+
+.result-list-container {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-list {
+    width: 80%;
+    overflow-y: scroll;
+    max-height: calc(100vh - 610px);
+    padding-right: 8px;
+}
+
+.result-list-item {
+    display: flex;
+    flex-direction: row;
+    border: 2px solid #ccc;
+    padding: 12px;
+    margin-bottom: 2px;
 }

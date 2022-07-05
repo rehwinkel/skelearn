@@ -1,6 +1,6 @@
 import "./RegularExam.scss";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import colors from "../colors.module.scss";
 import Card from "../components/Card";
 import ZoomImage from "../components/ZoomImage";
@@ -8,6 +8,8 @@ import { apiGetAnatomy } from "../api";
 import Button from "../components/Button";
 import { Link } from "wouter";
 import ProgressBar from "../components/ProgressBar";
+import { mdiCheckAll, mdiCheckCircle, mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiCrossOutline } from "@mdi/js";
+import Icon from "@mdi/react";
 
 interface AnatomicStructure {
     centerX: number,
@@ -118,13 +120,56 @@ function Timeout({ next }: { next: (e: any) => void }) {
     );
 }
 
-function Finished() {
+function ResultItem({ first, last, status, children }: { first: boolean, last: boolean, status: "correct" | "wrong" | "slow", children?: ReactNode }) {
     return (
-        <div>
-            Finished
-            <Link to="/dashboard">
-                <Button onClick={() => { }}>Go Home sad :(</Button>
-            </Link>
+        <div className="result-list-item" style={{
+            borderTopLeftRadius: first ? "16px" : undefined,
+            borderTopRightRadius: first ? "16px" : undefined,
+            borderBottomLeftRadius: last ? "16px" : undefined,
+            borderBottomRightRadius: last ? "16px" : undefined
+        }}>
+            <span>{children}</span>
+            <div style={{ flexGrow: 1 }}></div>
+            <Icon size={1} color={
+                status === "correct" ? colors["success-color"] :
+                    (status === "slow" ? colors["warn-color"] : colors["error-color"])}
+                path={
+                    status === "correct" ? mdiCheckCircleOutline :
+                        (status === "slow" ? mdiClockOutline : mdiCloseCircleOutline)}></Icon>
+        </div>
+    );
+}
+
+function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure> }) {
+    let correctPercentage = Math.floor(100.0 * (correct.length / (correct.length + wrong.length + slow.length)));
+    let correctWithStatus = correct.map(e => { (e as any).status = "correct"; return e; });
+    let wrongWithStatus = wrong.map(e => { (e as any).status = "wrong"; return e; });
+    let slowWithStatus = slow.map(e => { (e as any).status = "slow"; return e; });
+    let resultsList: Array<any> = correctWithStatus.concat(slowWithStatus).concat(wrongWithStatus);
+
+    return (
+        <div className="exam-results">
+            <div>
+                <span>Du hattest {correctPercentage > 0 ? ((correctPercentage < 50 ? "nur " : "") + correctPercentage + "%") : "garnichts"} richtig! </span>
+                {correctPercentage < 50 ?
+                    <span>
+                        Du solltest vielleicht nochmal in den <Link to="/learn" style={{ color: colors["text-color"], textDecorationLine: "underline" }}>Lernmodus</Link> wechseln.
+                    </span> : null}
+            </div>
+            <div className="result-list-container">
+                <span className="result-list-title">Ergebnisse</span>
+                <div className="result-list">
+                    {(resultsList).map((r: any, i: number) => {
+                        return <ResultItem key={i} first={i === 0} last={i === resultsList.length - 1} status={r.status}>{r.title}</ResultItem>
+                    })}
+                </div>
+            </div>
+            <div className="result-back-home">
+                <div style={{ flexGrow: 1 }} />
+                <Link to="/dashboard">
+                    <Button size="large" onClick={() => { }}>Zum Dashboard</Button>
+                </Link>
+            </div>
         </div>
     );
 }
@@ -165,6 +210,22 @@ function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imag
         getInfo();
     }, [setStructures]);
 
+    let [correct, setCorrect] = useState<Array<AnatomicStructure>>([]);
+    let [wrong, setWrong] = useState<Array<AnatomicStructure>>([]);
+    let [slow, setSlow] = useState<Array<AnatomicStructure>>([]);
+
+    const addCorrect = (e: AnatomicStructure) => {
+        setCorrect([e, ...correct])
+    }
+
+    const addWrong = (e: AnatomicStructure) => {
+        setWrong([e, ...wrong])
+    }
+
+    const addSlow = (e: AnatomicStructure) => {
+        setSlow([e, ...slow])
+    }
+
     function askNext() {
         if (currentIndex + 1 === structures.length) {
             setMode(ExamMode.Finished);
@@ -188,12 +249,15 @@ function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imag
                                     currentStructure={currentStructure}
                                     timed={timed}
                                     onSuccess={() => {
+                                        addCorrect(currentStructure);
                                         setMode(ExamMode.Success);
                                     }}
                                     onFailure={() => {
+                                        addWrong(currentStructure);
                                         setMode(ExamMode.Failure);
                                     }}
                                     onTimeout={() => {
+                                        addSlow(currentStructure);
                                         setMode(ExamMode.Timeout);
                                     }} />;
                             case ExamMode.AskText:
@@ -205,7 +269,7 @@ function SpacedRepExam({ textMode, imageMode, timed }: { textMode: boolean, imag
                             case ExamMode.Timeout:
                                 return <Timeout next={askNext} />;
                             case ExamMode.Finished:
-                                return <Finished />;
+                                return <Finished correct={correct} wrong={wrong} slow={slow} />;
                         }
                     })()
                 }

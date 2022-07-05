@@ -46,12 +46,12 @@ function Learn() {
     }
 
     return (
-        <Card style={{ width: "80%" }} loading={currentStructure === null}>
+        <Card style={{ width: "60%" }} loading={currentStructure === null}>
             <div style={{ textAlign: "center" }}>
                 <span className="card-title">Lernmodus</span>
             </div>
             <div className="learn-container">
-                <div style={{ height: "max(300px, calc(100vh - 370px))" }}>
+                <div style={{ flexGrow: 2, height: "max(300px, calc(100vh - 370px))" }}>
                     <ZoomImage
                         src={currentStructure?.img}
                         position={!!currentStructure ? {

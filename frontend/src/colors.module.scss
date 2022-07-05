@@ -6,6 +6,8 @@ $accent-color-dark: #519657;
 $accent-text-color: #ffffff;
 $text-color: #000000CC;
 $error-color: #db4040;
+$warn-color: #e0bf2a;
+$success-color: #51b133;
 
 :export {
   primary-color: $primary-color;
@@ -16,4 +18,6 @@ $error-color: #db4040;
   accent-text-color: $accent-text-color;
   text-color: $text-color;
   error-color: $error-color;
+  success-color: $success-color;
+  warn-color: $warn-color;
 }
