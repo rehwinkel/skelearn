@@ -4,9 +4,9 @@ import "./Learn.scss";
 import accurateSkel from "../accurate-skeleton.png";
 import accurateSkelSide from "../accurate-skeleton-side.png";
 import IconButton from "../components/IconButton";
-import { mdiArrowCollapse, mdiArrowLeft, mdiArrowRight, mdiMoveResize, mdiSetCenter } from "@mdi/js";
+import { mdiArrowCollapse, mdiArrowLeft, mdiArrowRight } from "@mdi/js";
 import ZoomImage from "../components/ZoomImage";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 interface AnatomicStructure {
     centerX: number,
@@ -18,47 +18,55 @@ interface AnatomicStructure {
 }
 
 function Learn() {
-    let [currentStructure, setCurrentStructure] = useState<AnatomicStructure>(null!);
-    let structures: Array<AnatomicStructure> = [
-        {
-            centerX: 730,
-            centerY: 1130,
-            radius: 125,
-            title: "Femur",
-            description: "Der <b>Femur</b> ist der geilste Knochen im Oberschenkel.\nEr besteht aus Knochen.",
-            img: accurateSkel,
-        },
-        {
-            centerX: 215,
-            centerY: 570,
-            radius: 105,
-            title: "Humerus",
-            description: "Der Humerus, auch als LMAO-Knochen bekannt, kostet etwa 6,50€.",
-            img: accurateSkel,
-        },
-        {
-            centerX: 290,
-            centerY: 540,
-            radius: 210,
-            title: "Skull",
-            description: "Das ist halt einfach ein Kopf du Dickschädel.",
-            img: accurateSkelSide,
-        },
-        {
-            centerX: 300,
-            centerY: 510,
-            radius: 15,
-            title: "Tear",
-            description: "Sad :(",
-            img: accurateSkelSide,
-        }
-    ];
+    let [currentIndex, setCurrentIndex] = useState<number>(0);
+    let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
+
 
     useEffect(() => {
         setTimeout(() => {
-            setCurrentStructure(structures[3]);
+            setStructures([
+                {
+                    centerX: 730,
+                    centerY: 1130,
+                    radius: 125,
+                    title: "Femur",
+                    description: "Der <b>Femur</b> ist der geilste Knochen im Oberschenkel.\nEr besteht aus Knochen.",
+                    img: accurateSkel,
+                },
+                {
+                    centerX: 215,
+                    centerY: 570,
+                    radius: 105,
+                    title: "Humerus",
+                    description: "Der Humerus, auch als LMAO-Knochen bekannt, kostet etwa 6,50€.",
+                    img: accurateSkel,
+                },
+                {
+                    centerX: 290,
+                    centerY: 540,
+                    radius: 210,
+                    title: "Skull",
+                    description: "Das ist halt einfach ein Kopf du Dickschädel.",
+                    img: accurateSkelSide,
+                },
+                {
+                    centerX: 300,
+                    centerY: 510,
+                    radius: 15,
+                    title: "Tear",
+                    description: "Sad :(",
+                    img: accurateSkelSide,
+                }
+            ]);
         }, 1000);
-    }, [setCurrentStructure]);
+    }, [setStructures]);
+
+    let currentStructure = structures.length > 0 ? structures[currentIndex] : null;
+
+    function next(c: number) {
+        setCurrentIndex((currentIndex + c + structures.length) % structures.length);
+    }
 
     return (
         <Card style={{ width: "80%" }} loading={currentStructure === null}>
@@ -83,11 +91,11 @@ function Learn() {
                                 {currentStructure?.description || "Loading..."}
                             </p>
                         </div>
-                        <IconButton icon={mdiArrowCollapse} onClick={() => { }}></IconButton>
+                        <IconButton icon={mdiArrowCollapse} onClick={() => { forceUpdate(); }}></IconButton>
                     </div>
                     <div className="learn-button-spacer"></div>
                     <div className="learn-buttons">
-                        <IconButton icon={mdiArrowLeft} onClick={() => { }}></IconButton>
+                        <IconButton icon={mdiArrowLeft} onClick={() => { next(-1); }}></IconButton>
                         <span>
                             <span>Previous</span>
                         </span>
@@ -96,7 +104,7 @@ function Learn() {
                         <span>
                             <span>Next</span>
                         </span>
-                        <IconButton icon={mdiArrowRight} onClick={() => { }}></IconButton>
+                        <IconButton icon={mdiArrowRight} onClick={() => { next(1); }}></IconButton>
                     </div>
                 </div>
             </div>

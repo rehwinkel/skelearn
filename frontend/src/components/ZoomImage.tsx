@@ -1,4 +1,4 @@
-import { MouseEvent, RefObject, useEffect, useRef, useState } from "react";
+import { ForwardedRef, forwardRef, MouseEvent, RefObject, useEffect, useRef, useState } from "react";
 import "./ZoomImage.scss";
 
 function getImageDimensions(src: any): Promise<{ width: number, height: number }> {
@@ -14,7 +14,7 @@ function getImageDimensions(src: any): Promise<{ width: number, height: number }
     });
 }
 
-function ZoomImage({ src, position }: { src: any, position?: { x: number, y: number, size: number } }) {
+const ZoomImage = forwardRef(({ src, position }: { src: any, position?: { x: number, y: number, size: number } }, ref: ForwardedRef<HTMLDivElement>) => {
     let container: RefObject<HTMLDivElement> = useRef(null);
     let [containerWidth, setContainerWidth] = useState(0);
     let [containerHeight, setContainerHeight] = useState(0);
@@ -147,12 +147,12 @@ function ZoomImage({ src, position }: { src: any, position?: { x: number, y: num
     }
 
     return (
-        <div className="zoom-image-border">
+        <div ref={ref} className="zoom-image-border">
             <div ref={container} className="zoom-image-container" style={{ cursor: dragging ? "grabbing" : "grab" }} onMouseMove={drag} onMouseDown={() => { setDragging(true); }} onMouseUp={() => { setDragging(false); }} onMouseLeave={() => { setDragging(false); }} >
                 <img style={{ width: userScale * scale * containerWidth, top: yOffset + "px", left: xOffset + "px" }} src={src} alt="Skelett"></img>
             </div>
         </div>
     );
-}
+});
 
 export default ZoomImage;
