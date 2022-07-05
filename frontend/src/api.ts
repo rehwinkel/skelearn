@@ -1,3 +1,5 @@
+import goofySkeleton from "./goofy-skeleton.png";
+
 const endpoint = "http://localhost:8080/api/v1";
 
 function post(path: string, headers: any, body?: any): Promise<Response> {
@@ -33,7 +35,41 @@ async function apiCheckToken(token: string) {
     return true;
 }
 
+interface AnatomyElement {
+    name: string,
+    description: string,
+    tip: string,
+    img: any,
+    imgPosX: number,
+    imgPosY: number,
+    radius: number,
+    selectionRadius: number
+}
+
+async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
+    return [{
+        imgPosX: 777,
+        imgPosY: 431,
+        selectionRadius: 35,
+        radius: 90,
+        img: goofySkeleton,
+        name: "Nasenknochen",
+        description: "Der Nasenknochen ist ein nonexistenter Knochen in der Nase.",
+        tip: "Die Nase ist im Gesicht"
+    }, {
+        imgPosX: 1332,
+        imgPosY: 974,
+        selectionRadius: 80,
+        radius: 160,
+        img: goofySkeleton,
+        name: "Handknochen",
+        description: "Der Hand ist ein nonexistenter Knochen in der Nase.",
+        tip: "Die Hand ist im Gesicht"
+    }];
+}
+
 export {
     apiLogin,
     apiCheckToken,
+    apiGetAnatomy,
 };
