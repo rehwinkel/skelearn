@@ -56,6 +56,15 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         name: "Nasenknochen",
         description: "Der Nasenknochen ist ein nonexistenter Knochen in der Nase.",
         tip: "Die Nase ist im Gesicht"
+    }, {
+        imgPosX: 1332,
+        imgPosY: 974,
+        selectionRadius: 80,
+        radius: 160,
+        img: goofySkeleton,
+        name: "Handknochen",
+        description: "Der Hand ist ein nonexistenter Knochen in der Nase.",
+        tip: "Die Hand ist im Gesicht"
     }];
 }
 
