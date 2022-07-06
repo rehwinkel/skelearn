@@ -340,7 +340,7 @@ async fn main() -> eyre::Result<()> {
                     .route("/register", web::post().to(register_handler))
                     .route("/token", web::post().to(check_token_handler))
                     .route("/submitResult", web::post().to(submit_result_handler))
-                    .route("/results", web::get().to(results_handler)),
+                    .route("/results", web::post().to(results_handler)),
             )
     })
     .bind(("127.0.0.1", 8080))?

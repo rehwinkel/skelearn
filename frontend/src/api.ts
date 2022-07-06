@@ -7,12 +7,12 @@ function isString(x: any) {
     return Object.prototype.toString.call(x) === "[object String]";
 }
 
-function post(path: string, headers: any, body?: any): Promise<Response> {
-    return fetch(endpoint + path, { method: "POST", mode: "cors", headers: { "Content-Type": "application/json", ...headers }, body: body !== undefined ? (isString(body) ? body : JSON.stringify(body)) : undefined });
+function request(method: string, path: string, headers: any, body?: any) {
+    return fetch(endpoint + path, { method: method, mode: "cors", headers: { "Content-Type": "application/json", ...headers }, body: body !== undefined ? (isString(body) ? body : JSON.stringify(body)) : undefined });
 }
 
-function get(path: string, headers: any): Promise<Response> {
-    return fetch(endpoint + path, { method: "GET", mode: "cors", headers: { "Content-Type": "application/json", ...headers } });
+function post(path: string, headers: any, body?: any): Promise<Response> {
+    return request("POST", path, headers, body);
 }
 
 async function hashPasswd(passwd: string): Promise<string> {
@@ -61,6 +61,17 @@ async function apiSubmitResult({ correct, wrong, slow }: { correct: Array<string
     let response: Response;
     try {
         response = await post("/submitResult", {}, { correct, wrong, slow, token });
+        return response;
+    } catch (err: any) {
+        console.error(err);
+        return null;
+    }
+}
+
+async function apiGetResults(token: string): Promise<Response | null> {
+    let response: Response;
+    try {
+        response = await post("/results", {}, token);
         return response;
     } catch (err: any) {
         console.error(err);
@@ -137,6 +148,7 @@ export {
     apiRegister,
     apiCheckToken,
     apiSubmitResult,
+    apiGetResults,
     apiGetAnatomy,
     apiGetCategories
 };

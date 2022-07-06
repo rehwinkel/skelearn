@@ -9,7 +9,8 @@ import Check from "../components/Check";
 import ProgressBar from "../components/ProgressBar";
 import { Link, useLocation } from "wouter";
 import Alert from "../components/Alert";
-import { apiGetCategories } from "../api";
+import { apiGetCategories, apiGetResults } from "../api";
+import { useAuth } from "../auth";
 
 enum ExamMode {
     Regular,
@@ -22,6 +23,7 @@ interface Category {
 }
 
 function Dashboard() {
+    let auth = useAuth();
     let [_, setLocation] = useLocation();
     let [mode, setMode] = useState<ExamMode>(ExamMode.Regular);
     let [imageMode, setImageMode] = useState<boolean>(false);
@@ -29,6 +31,8 @@ function Dashboard() {
     let [category, setCategory] = useState("");
 
     let [categories, setCategories] = useState<Array<Category>>([]);
+    let [results, setResults] = useState<any>(null!);
+    let [loadingResults, setLoadingResults] = useState<boolean>(false);
 
     useEffect(() => {
         let getInfo = async () => {
@@ -37,11 +41,27 @@ function Dashboard() {
         getInfo();
     }, [setCategories]);
 
+    useEffect(() => {
+        let getInfo = async () => {
+            setLoadingResults(true);
+            let response = await apiGetResults(auth.session.token);
+            if (response && response.ok) {
+                let data = await response.json();
+                setResults(data);
+            }
+            setLoadingResults(false);
+        };
+        getInfo();
+    }, [setResults, auth]);
+
     return (
         <div className="dashboard-container">
-            <Card loading={false}>
+            <Card loading={loadingResults}>
                 <div style={{ textAlign: "center" }}>
                     <span className="card-title">Lernfortschritt</span>
+                </div>
+                <div>
+                    {JSON.stringify(results)}
                 </div>
                 <IconButton onClick={() => { /* TODO */ }} icon={mdiTrashCanOutline}></IconButton>
                 <span className="dashboard-section-title">Spaced-Rep. (90%)</span>
