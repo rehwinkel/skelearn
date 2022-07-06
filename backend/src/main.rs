@@ -1,15 +1,15 @@
-use std::{
-    error::Error,
-    fmt::Display,
-    time::{Duration, SystemTime, UNIX_EPOCH},
-};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use actix_cors::Cors;
 use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpServer,
 };
-use mongodb::{bson::doc, options::ClientOptions, Client, Collection, Database};
+use mongodb::{
+    bson::{doc, to_document},
+    options::{ClientOptions, IndexOptions},
+    Client, Collection, Database, IndexModel,
+};
 use rand_chacha::rand_core::{RngCore, SeedableRng};
 use serde::{Deserialize, Serialize};
 
@@ -19,11 +19,18 @@ struct Credentials {
     passwd: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Session {
     timestamp: u64,
     lifetime: u64,
     token: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct User {
+    username: String,
+    passwd_hash: String,
+    sessions: Vec<Session>,
 }
 
 impl Session {
@@ -41,103 +48,88 @@ impl Session {
     }
 
     fn is_valid(&self) -> bool {
-        let timestamp = UNIX_EPOCH
-            .checked_add(Duration::from_millis(self.timestamp))
-            .unwrap();
-        let now = SystemTime::now();
-        let lifetime = Duration::from_millis(self.lifetime);
-        timestamp.checked_add(lifetime).unwrap() < now
+        let now_ms = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64;
+        now_ms < self.timestamp + self.lifetime
     }
 }
 
-#[derive(Serialize, Deserialize)]
-struct User {
-    username: String,
-    passwd_hash: String,
-    sessions: Vec<Session>,
-}
-
-#[derive(Debug)]
-enum AppError {
-    UsernameTaken,
-    InvalidCredentials,
-    InvalidToken,
-}
-
-impl Error for AppError {}
-
-impl Display for AppError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-async fn register(db: &Database, creds: &Credentials) -> eyre::Result<()> {
+async fn register(db: &Database, creds: &Credentials) -> eyre::Result<bool> {
     let users: Collection<User> = db.collection("users");
-    let existing_user = users
-        .find_one(doc! { "username": &creds.username }, None)
+    users
+        .create_index(
+            IndexModel::builder()
+                .keys(doc! { "username": 1 })
+                .options(IndexOptions::builder().unique(true).build())
+                .build(),
+            None,
+        )
         .await?;
-    if existing_user.is_none() {
-        users
-            .insert_one(
-                User {
-                    username: String::from(&creds.username),
-                    passwd_hash: bcrypt::hash(&creds.passwd, bcrypt::DEFAULT_COST)?,
-                    sessions: Vec::new(),
-                },
-                None,
-            )
-            .await?;
-        Ok(())
-    } else {
-        Err(AppError::UsernameTaken.into())
-    }
+    let insert_result = users
+        .insert_one(
+            User {
+                username: String::from(&creds.username),
+                passwd_hash: bcrypt::hash(&creds.passwd, bcrypt::DEFAULT_COST)?,
+                sessions: Vec::new(),
+            },
+            None,
+        )
+        .await;
+    Ok(insert_result.is_ok())
 }
 
-async fn login(db: &Database, creds: &Credentials) -> eyre::Result<String> {
-    // TODO: delete old sessions
+async fn login(db: &Database, creds: &Credentials) -> eyre::Result<Option<String>> {
     let users: Collection<User> = db.collection("users");
     let user_opt = users
         .find_one(doc! { "username": &creds.username }, None)
         .await?;
-    if let Some(mut user) = user_opt {
+    if let Some(user) = user_opt {
         if bcrypt::verify(&creds.passwd, &user.passwd_hash)? {
             let session = Session::new_random();
-            let token = session.token.clone();
-            user.sessions.push(session);
-            users.insert_one(user, None).await?;
-            Ok(token)
+            users
+                .update_one(
+                    doc! { "username": &creds.username },
+                    doc! { "$push": { "sessions": to_document(&session)? } },
+                    None,
+                )
+                .await?;
+            // TODO: delete old sessions
+            Ok(Some(session.token))
         } else {
-            Err(AppError::InvalidCredentials.into())
+            Ok(None)
         }
     } else {
-        Err(AppError::InvalidCredentials.into())
+        Ok(None)
     }
 }
 
-async fn check_token(db: &Database, token: &String) -> eyre::Result<()> {
+async fn check_token(db: &Database, token: &String) -> eyre::Result<bool> {
     let users: Collection<User> = db.collection("users");
     let user_with_token = users
         .find_one(
-            doc! {"sessions": doc!{"$elemMatch": doc!{"token": &token}}},
+            doc! { "sessions": doc!{ "$elemMatch": { "token": &token } } },
             None,
         )
         .await?;
     if let Some(user) = user_with_token {
         let session = user.sessions.iter().find(|s| &s.token == token).unwrap();
-        if session.is_valid() {
-            Ok(())
-        } else {
-            Err(AppError::InvalidToken.into())
-        }
+        Ok(session.is_valid())
     } else {
-        Err(AppError::InvalidToken.into())
+        Ok(false)
     }
 }
 
 async fn login_handler(db: Data<Database>, credentials: web::Json<Credentials>) -> HttpResponse {
     match login(&db, &credentials).await {
-        Ok(token) => HttpResponse::Ok().body(token),
+        Ok(token_opt) => {
+            if let Some(token) = token_opt {
+                HttpResponse::Ok().body(token)
+            } else {
+                HttpResponse::Unauthorized().finish()
+            }
+        }
         Err(e) => {
             eprintln!("Error while handling login: {:?}", e);
             HttpResponse::InternalServerError().body("Internal Server Error")
@@ -147,7 +139,13 @@ async fn login_handler(db: Data<Database>, credentials: web::Json<Credentials>) 
 
 async fn register_handler(db: Data<Database>, credentials: web::Json<Credentials>) -> HttpResponse {
     match register(&db, &credentials).await {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(result) => {
+            if result {
+                HttpResponse::Ok().finish()
+            } else {
+                HttpResponse::Unauthorized().finish()
+            }
+        }
         Err(e) => {
             eprintln!("Error while handling register: {:?}", e);
             HttpResponse::InternalServerError().body("Internal Server Error")
@@ -157,7 +155,13 @@ async fn register_handler(db: Data<Database>, credentials: web::Json<Credentials
 
 async fn check_token_handler(db: Data<Database>, token: String) -> HttpResponse {
     match check_token(&db, &token).await {
-        Ok(_) => HttpResponse::Ok().finish(),
+        Ok(result) => {
+            if result {
+                HttpResponse::Ok().finish()
+            } else {
+                HttpResponse::Unauthorized().finish()
+            }
+        }
         Err(e) => {
             eprintln!("Error while handling register: {:?}", e);
             HttpResponse::InternalServerError().body("Internal Server Error")
