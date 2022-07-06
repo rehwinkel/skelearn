@@ -21,6 +21,7 @@ interface AnatomicStructure {
     img: any,
     tip: string,
     key: string,
+    modes: Array<"img" | "text">
 }
 
 function Timer({ onElapsed, timerSeconds }: { onElapsed: () => void, timerSeconds: number }) {
@@ -236,30 +237,40 @@ enum ExamMode {
     Finished,
 }
 
-function getNextMode(textMode: boolean, imageMode: boolean): ExamMode {
+function getNextMode(textMode: boolean, imageMode: boolean, supportedModes: Array<"img" | "text">): ExamMode {
     let options = [];
-    if (textMode) {
+    if (textMode && supportedModes.includes("text")) {
         options.push(ExamMode.AskText);
     }
-    if (imageMode) {
+    if (imageMode && supportedModes.includes("img")) {
         options.push(ExamMode.AskImage);
     }
-    let index = Math.round(Math.random() * (options.length - 1));
-    console.log(options, index);
-    return options[index];
+    if (options.length === 0) {
+        return null!;
+    } else {
+        let index = Math.round(Math.random() * (options.length - 1));
+        return options[index];
+    }
 }
 
 function RegularExam({ textMode, imageMode, timed, category }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
     let [currentIndex, setCurrentIndex] = useState<number>(0);
+
     let currentStructure: AnatomicStructure = structures.length > 0 ? structures[currentIndex] : null!;
 
-    console.log(textMode, imageMode);
-    let [mode, setMode] = useState(getNextMode(textMode, imageMode));
+    let [mode, setMode] = useState(ExamMode.AskImage);
+
+    useEffect(() => {
+        if (currentStructure) {
+            let startMode = getNextMode(textMode, imageMode, currentStructure.modes);
+            setMode(startMode);
+        }
+    }, [currentStructure])
 
     useEffect(() => {
         const getInfo = async () => {
-            let rawData = await apiGetAnatomy(); 
+            let rawData = await apiGetAnatomy();
             let categories = await apiGetCategories();
             let foundCategory = categories.find(c => c.name === category)!;
 
@@ -273,6 +284,7 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                         img: elem.img,
                         key: elem.name,
                         tip: elem.tip,
+                        modes: elem.examModes
                     };
                 }
             ));
@@ -300,8 +312,22 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
         if (currentIndex + 1 === structures.length) {
             setMode(ExamMode.Finished);
         } else {
-            setMode(getNextMode(textMode, imageMode));
-            setCurrentIndex(currentIndex + 1);
+            let i = 1;
+            while (true) {
+                if (currentIndex + i === structures.length) {
+                    setMode(ExamMode.Finished);
+                    break;
+                }
+                let newMode = getNextMode(textMode, imageMode, structures[currentIndex + i].modes);
+                console.log(currentIndex, i, newMode);
+                if (newMode === null) {
+                    i++;
+                    continue;
+                }
+                setMode(newMode);
+                setCurrentIndex(currentIndex + i);
+                break;
+            }
         }
     }
 

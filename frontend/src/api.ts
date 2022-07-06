@@ -44,7 +44,8 @@ interface AnatomyElement {
     imgPosX: number,
     imgPosY: number,
     radius: number,
-    selectionRadius: number
+    selectionRadius: number,
+    examModes: Array<"img" | "text">,
 }
 
 async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
@@ -55,6 +56,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         radius: 90,
         img: goofySkeleton,
         name: "Nasenknochen",
+        examModes: ["img", "text"],
         description: "Der Nasenknochen ist ein nonexistenter Knochen in der Nase.",
         tip: "Die Nase ist im Gesicht"
     }, {
@@ -64,6 +66,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         radius: 160,
         img: goofySkeleton,
         name: "Handknochen",
+        examModes: ["img", "text"],
         description: "Der Hand ist ein nonexistenter Knochen in der Nase.",
         tip: "Die Hand ist im Gesicht"
     }, {
@@ -73,6 +76,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         radius: 125,
         img: accurateSkeleton,
         name: "Femur",
+        examModes: ["text"],
         description: "Der Femur ist im Leg.",
         tip: "Femur ist halt Oberschenkel."
     }];
