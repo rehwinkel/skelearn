@@ -5,7 +5,7 @@ import ZoomImage from "../components/ZoomImage";
 import IconButton from "../components/IconButton";
 import { mdiArrowLeft, mdiArrowRight } from "@mdi/js";
 import { useEffect, useReducer, useState } from "react";
-import { apiGetAnatomy } from "../api";
+import { apiGetAnatomy, apiGetCategories } from "../api";
 
 interface AnatomicStructure {
     centerX: number,
@@ -16,14 +16,17 @@ interface AnatomicStructure {
     img: any,
 }
 
-function Learn() {
+function Learn({ category }: { category: string }) {
     let [currentIndex, setCurrentIndex] = useState<number>(0);
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
 
     useEffect(() => {
         const getInfo = async () => {
             let rawData = await apiGetAnatomy();
-            setStructures(rawData.map(
+            let categories = await apiGetCategories();
+            let foundCategory = categories.find(c => c.name === category)!;
+
+            setStructures(rawData.filter(elem => foundCategory.elements.includes(elem.name)).map(
                 elem => {
                     return {
                         centerX: elem.imgPosX,

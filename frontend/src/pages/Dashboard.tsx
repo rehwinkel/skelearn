@@ -59,10 +59,13 @@ function Dashboard() {
                     <Select options={categories.map(c => { return { key: c.name, name: c.name + " (" + c.elements.length + ")" }; })} onSelected={(e) => { setCategory(e.target.value); }}></Select>
                     <IconButton icon={mdiPencil} onClick={() => { }}></IconButton>
                 </div>
+                {!category ?
+                    <div style={{ marginTop: "8px" }}>
+                        <Alert>Du musst eine Kategorie auswählen!</Alert>
+                    </div>
+                    : undefined}
                 <span className="dashboard-section-title">Lernmodus</span>
-                <Link to="/learn">
-                    <Button size="large" onClick={() => { }}>Jetzt loslernen</Button>
-                </Link>
+                <Button size="large" onClick={() => { if (!category) return; setLocation("/learn/" + category) }}>Jetzt loslernen</Button>
                 <span className="dashboard-section-title">Abfragemodus</span>
                 <div className="dashboard-test-settings">
                     <div className="dashboard-mode-buttons">
@@ -77,13 +80,9 @@ function Dashboard() {
                         <Alert>Du musst mindestens eine Option wählen!</Alert>
                     </div>
                     : undefined}
-                {!category ?
-                    <div style={{ marginTop: "8px" }}>
-                        <Alert>Du musst eine Kategorie auswählen!</Alert>
-                    </div>
-                    : undefined}
                 <Button style={{ marginTop: "16px" }} size="large" onClick={() => {
                     if (!imageMode && !textMode) return;
+                    if (!category) return;
                     let path = (mode === ExamMode.Regular ? "/exam/regular" : "/exam/real") + "/" + category + "/"
                         + (textMode ? "yes" : "no") + "txt" + "/"
                         + (imageMode ? "yes" : "no") + "img";

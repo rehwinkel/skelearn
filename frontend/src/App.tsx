@@ -48,7 +48,13 @@ function App() {
                         <Route path="/login" ><Login /></Route>
                         <Route path="/register" ><Register /></Route>
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
-                        <Route path="/learn" ><RequireAuth fallback={<Redirect to="/login" />}><Learn /></RequireAuth></Route>
+                        <Route path="/learn/:category" >
+                            {(params) => {
+                                return (
+                                    <RequireAuth fallback={<Redirect to="/login" />}><Learn category={params.category} /></RequireAuth>
+                                );
+                            }}
+                        </Route>
                         <Route path="/impressum" ><Impressum /></Route>
                         <Route path="/exam/regular/:category/:txt/:img" >
                             {(params) => {

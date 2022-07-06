@@ -8,7 +8,7 @@ import { apiGetAnatomy, apiGetCategories } from "../api";
 import Button from "../components/Button";
 import { Link } from "wouter";
 import ProgressBar from "../components/ProgressBar";
-import { mdiCheckAll, mdiCheckCircle, mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiCrossOutline, mdiInformation, mdiInformationOutline } from "@mdi/js";
+import { mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiInformationOutline } from "@mdi/js";
 import Icon from "@mdi/react";
 import IconButton from "../components/IconButton";
 import Input from "../components/Input";
@@ -259,7 +259,7 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
 
     useEffect(() => {
         const getInfo = async () => {
-            let rawData = await apiGetAnatomy(); category
+            let rawData = await apiGetAnatomy(); 
             let categories = await apiGetCategories();
             let foundCategory = categories.find(c => c.name === category)!;
 
