@@ -332,7 +332,6 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                     break;
                 }
                 let newMode = getNextMode(textMode, imageMode, structures[currentIndex + i].modes);
-                console.log(currentIndex, i, newMode);
                 if (newMode === null) {
                     i++;
                     continue;
