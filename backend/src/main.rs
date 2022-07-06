@@ -26,11 +26,28 @@ struct Session {
     token: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ExamResults {
+    timestamp: u64,
+    correct: Vec<String>,
+    wrong: Vec<String>,
+    slow: Vec<String>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ResultSubmission {
+    token: String,
+    correct: Vec<String>,
+    wrong: Vec<String>,
+    slow: Vec<String>,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct User {
     username: String,
     passwd_hash: String,
     sessions: Vec<Session>,
+    results: Vec<ExamResults>,
 }
 
 impl Session {
@@ -73,6 +90,7 @@ async fn register(db: &Database, creds: &Credentials) -> eyre::Result<bool> {
                 username: String::from(&creds.username),
                 passwd_hash: bcrypt::hash(&creds.passwd, bcrypt::DEFAULT_COST)?,
                 sessions: Vec::new(),
+                results: Vec::new(),
             },
             None,
         )
@@ -121,7 +139,7 @@ async fn login(db: &Database, creds: &Credentials) -> eyre::Result<Option<String
     }
 }
 
-async fn check_token(db: &Database, token: &String) -> eyre::Result<bool> {
+async fn check_token(db: &Database, token: &String) -> eyre::Result<Option<User>> {
     let users: Collection<User> = db.collection("users");
     let user_with_token = users
         .find_one(
@@ -131,7 +149,33 @@ async fn check_token(db: &Database, token: &String) -> eyre::Result<bool> {
         .await?;
     if let Some(user) = user_with_token {
         let session = user.sessions.iter().find(|s| &s.token == token).unwrap();
-        Ok(session.is_valid())
+        Ok(if session.is_valid() { Some(user) } else { None })
+    } else {
+        Ok(None)
+    }
+}
+
+async fn submit_result(db: &Database, submission: &ResultSubmission) -> eyre::Result<bool> {
+    let results = ExamResults {
+        correct: submission.correct.clone(),
+        wrong: submission.wrong.clone(),
+        slow: submission.slow.clone(),
+        timestamp: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u64,
+    };
+    let users: Collection<User> = db.collection("users");
+    let token = &submission.token;
+    if let Some(user) = check_token(db, token).await? {
+        users
+            .update_one(
+                doc! { "username": &user.username },
+                doc! { "$push": { "results": to_document(&results)? } },
+                None,
+            )
+            .await?;
+        Ok(true)
     } else {
         Ok(false)
     }
@@ -172,6 +216,25 @@ async fn register_handler(db: Data<Database>, credentials: web::Json<Credentials
 async fn check_token_handler(db: Data<Database>, token: String) -> HttpResponse {
     match check_token(&db, &token).await {
         Ok(result) => {
+            if result.is_some() {
+                HttpResponse::Ok().finish()
+            } else {
+                HttpResponse::Unauthorized().finish()
+            }
+        }
+        Err(e) => {
+            eprintln!("Error while handling register: {:?}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
+async fn submit_result_handler(
+    db: Data<Database>,
+    token: web::Json<ResultSubmission>,
+) -> HttpResponse {
+    match submit_result(&db, &token).await {
+        Ok(result) => {
             if result {
                 HttpResponse::Ok().finish()
             } else {
@@ -200,7 +263,8 @@ async fn main() -> eyre::Result<()> {
                 web::scope("/api/v1")
                     .route("/login", web::post().to(login_handler))
                     .route("/register", web::post().to(register_handler))
-                    .route("/token", web::post().to(check_token_handler)),
+                    .route("/token", web::post().to(check_token_handler))
+                    .route("/submitResult", web::post().to(submit_result_handler)),
             )
     })
     .bind(("127.0.0.1", 8080))?
