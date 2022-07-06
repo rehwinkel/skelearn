@@ -262,7 +262,9 @@ dependencies = [
  "actix-web",
  "bcrypt",
  "eyre",
+ "hex",
  "mongodb",
+ "rand_chacha",
  "serde",
  "serde_json",
 ]
