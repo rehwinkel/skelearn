@@ -4,12 +4,12 @@ import Select from "../components/Select";
 import IconButton from "../components/IconButton";
 import { mdiPencil, mdiTrashCanOutline } from "@mdi/js";
 import Button from "../components/Button";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Check from "../components/Check";
 import ProgressBar from "../components/ProgressBar";
 import { Link, useLocation } from "wouter";
 import Alert from "../components/Alert";
-import { apiGetCategories, apiGetResults } from "../api";
+import { apiGetAnatomy, apiGetCategories, apiGetResults } from "../api";
 import { useAuth } from "../auth";
 
 enum ExamMode {
@@ -22,6 +22,25 @@ interface Category {
     elements: Array<string>,
 }
 
+function ResultItem({ first, last, children, progress }: { first: boolean, last: boolean, children?: ReactNode, progress: number }) {
+    return (
+        <div className="learn-result-list-item" style={{
+            borderTopLeftRadius: first ? "16px" : undefined,
+            borderTopRightRadius: first ? "16px" : undefined,
+            borderBottomLeftRadius: last ? "16px" : undefined,
+            borderBottomRightRadius: last ? "16px" : undefined
+        }}>
+            <div style={{ flexGrow: 1 }}>
+                <span>{children}</span>
+            </div>
+            <div className="learn-results-item-progress">
+                <span>{Math.floor(100 * progress)}%</span>
+                <ProgressBar progress={progress}></ProgressBar>
+            </div>
+        </div>
+    );
+}
+
 function Dashboard() {
     let auth = useAuth();
     let [_, setLocation] = useLocation();
@@ -30,6 +49,7 @@ function Dashboard() {
     let [textMode, setTextMode] = useState<boolean>(false);
     let [category, setCategory] = useState("");
 
+    let [structures, setStructures] = useState<Array<any>>([]);
     let [categories, setCategories] = useState<Array<Category>>([]);
     let [results, setResults] = useState<any>(null!);
     let [loadingResults, setLoadingResults] = useState<boolean>(false);
@@ -40,6 +60,13 @@ function Dashboard() {
         };
         getInfo();
     }, [setCategories]);
+
+    useEffect(() => {
+        let getInfo = async () => {
+            setStructures(await apiGetAnatomy());
+        };
+        getInfo();
+    }, [setStructures]);
 
     useEffect(() => {
         let getInfo = async () => {
@@ -60,16 +87,34 @@ function Dashboard() {
                 <div style={{ textAlign: "center" }}>
                     <span className="card-title">Lernfortschritt</span>
                 </div>
-                <div>
-                    {JSON.stringify(results)}
-                </div>
-                <IconButton onClick={() => { /* TODO */ }} icon={mdiTrashCanOutline}></IconButton>
-                <span className="dashboard-section-title">Spaced-Rep. (90%)</span>
-                <ProgressBar progress={0.9}></ProgressBar>
-                <span className="dashboard-section-title">Timer (5%)</span>
-                <ProgressBar progress={0.05}></ProgressBar>
-                <span className="dashboard-section-title">Prüfung (51%)</span>
-                <ProgressBar progress={0.51}></ProgressBar>
+                {results === null || results.total_score === null ? <span>Du hast in deinem Leben nichts erreicht...</span> :
+                    <div>
+                        <div className="learn-progress-heading">
+                            <span>Im Schnitt hast du {Math.floor(results.total_score * 100)}% der Fragen richtig beantwortet.</span>
+                            <div style={{ flexGrow: 1 }}></div>
+                            <IconButton style={{ flexShrink: 0 }} onClick={() => { /* TODO */ }} icon={mdiTrashCanOutline}></IconButton>
+                        </div>
+                        <span className="dashboard-section-title">Allgemeine Erfolgsquote ({Math.floor(results.total_score * 100)}%)</span>
+                        <ProgressBar progress={results.total_score}></ProgressBar>
+                        <span className="dashboard-section-title">Ergebnisse</span>
+                        <div className="learn-result-list-container">
+                            {
+                                (() => {
+                                    let entries: Array<[string, number]> = Object.entries(results.scores);
+                                    entries.sort((a, b) => (b[1] - a[1] === 0 ? a[0].localeCompare(b[0]) : b[1] - a[1]));
+                                    let elems = entries.map((entry, i: number) =>
+                                        <ResultItem
+                                            first={i === 0}
+                                            last={i === structures.length - 1}
+                                            progress={entry[1] as number}>
+                                            {structures.find(str => str.key === entry[0]).name}
+                                        </ResultItem>);
+                                    return elems;
+                                })()
+                            }
+                        </div>
+                    </div>
+                }
             </Card>
             <Card loading={false}>
                 <div style={{ textAlign: "center" }}>
