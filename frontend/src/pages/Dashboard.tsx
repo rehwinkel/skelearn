@@ -2,7 +2,7 @@ import "./Dashboard.scss";
 import Card from "../components/Card";
 import Select from "../components/Select";
 import IconButton from "../components/IconButton";
-import { mdiPencil } from "@mdi/js";
+import { mdiPencil, mdiTrashCanOutline } from "@mdi/js";
 import Button from "../components/Button";
 import { useEffect, useState } from "react";
 import Check from "../components/Check";
@@ -43,6 +43,7 @@ function Dashboard() {
                 <div style={{ textAlign: "center" }}>
                     <span className="card-title">Lernfortschritt</span>
                 </div>
+                <IconButton onClick={() => { /* TODO */ }} icon={mdiTrashCanOutline}></IconButton>
                 <span className="dashboard-section-title">Spaced-Rep. (90%)</span>
                 <ProgressBar progress={0.9}></ProgressBar>
                 <span className="dashboard-section-title">Timer (5%)</span>

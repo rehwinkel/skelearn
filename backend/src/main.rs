@@ -1,4 +1,7 @@
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    collections::HashMap,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use actix_cors::Cors;
 use actix_web::{
@@ -181,6 +184,67 @@ async fn submit_result(db: &Database, submission: &ResultSubmission) -> eyre::Re
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ResultSummary {
+    total_score: f64,
+    scores: HashMap<String, f64>,
+}
+
+async fn get_results(db: &Database, token: &String) -> eyre::Result<Option<ResultSummary>> {
+    if let Some(user) = check_token(db, token).await? {
+        let result_list;
+        if user.results.len() > 10 {
+            result_list = &user.results[user.results.len() - 10..]
+        } else {
+            result_list = &user.results;
+        }
+        let mut total_correct = 0;
+        let mut total_tested = 0;
+        let mut scores_correct = HashMap::new();
+        let mut scores_tested = HashMap::new();
+        for results in result_list {
+            for elem in &results.correct {
+                let old_score: u64 = if let Some(old_score) = scores_correct.get(&elem) {
+                    *old_score
+                } else {
+                    0
+                };
+                scores_correct.insert(elem, old_score + 1);
+            }
+            for result_kind in [&results.correct, &results.slow, &results.wrong] {
+                for elem in result_kind {
+                    let old_score: u64 = if let Some(old_score) = scores_tested.get(&elem) {
+                        *old_score
+                    } else {
+                        0
+                    };
+                    scores_tested.insert(elem, old_score + 1);
+                }
+            }
+            total_correct += results.correct.len();
+            total_tested += results.correct.len();
+            total_tested += results.slow.len();
+            total_tested += results.wrong.len();
+        }
+        let total = total_correct as f64 / total_tested as f64;
+        let scores: HashMap<String, f64> = scores_tested
+            .iter()
+            .map(|(&elem, score)| {
+                (
+                    elem.clone(),
+                    *scores_correct.get(elem).unwrap_or(&0) as f64 / *score as f64,
+                )
+            })
+            .collect();
+        Ok(Some(ResultSummary {
+            total_score: total,
+            scores,
+        }))
+    } else {
+        Ok(None)
+    }
+}
+
 async fn login_handler(db: Data<Database>, credentials: web::Json<Credentials>) -> HttpResponse {
     match login(&db, &credentials).await {
         Ok(token_opt) => {
@@ -223,7 +287,7 @@ async fn check_token_handler(db: Data<Database>, token: String) -> HttpResponse 
             }
         }
         Err(e) => {
-            eprintln!("Error while handling register: {:?}", e);
+            eprintln!("Error while handling check token: {:?}", e);
             HttpResponse::InternalServerError().body("Internal Server Error")
         }
     }
@@ -231,9 +295,9 @@ async fn check_token_handler(db: Data<Database>, token: String) -> HttpResponse 
 
 async fn submit_result_handler(
     db: Data<Database>,
-    token: web::Json<ResultSubmission>,
+    submission: web::Json<ResultSubmission>,
 ) -> HttpResponse {
-    match submit_result(&db, &token).await {
+    match submit_result(&db, &submission).await {
         Ok(result) => {
             if result {
                 HttpResponse::Ok().finish()
@@ -242,7 +306,18 @@ async fn submit_result_handler(
             }
         }
         Err(e) => {
-            eprintln!("Error while handling register: {:?}", e);
+            eprintln!("Error while handling submit results: {:?}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
+async fn results_handler(db: Data<Database>, token: String) -> HttpResponse {
+    match get_results(&db, &token).await {
+        Ok(Some(result)) => HttpResponse::Ok().body(serde_json::to_string(&result).unwrap()),
+        Ok(None) => HttpResponse::Unauthorized().finish(),
+        Err(e) => {
+            eprintln!("Error while handling get results: {:?}", e);
             HttpResponse::InternalServerError().body("Internal Server Error")
         }
     }
@@ -264,7 +339,8 @@ async fn main() -> eyre::Result<()> {
                     .route("/login", web::post().to(login_handler))
                     .route("/register", web::post().to(register_handler))
                     .route("/token", web::post().to(check_token_handler))
-                    .route("/submitResult", web::post().to(submit_result_handler)),
+                    .route("/submitResult", web::post().to(submit_result_handler))
+                    .route("/results", web::get().to(results_handler)),
             )
     })
     .bind(("127.0.0.1", 8080))?
