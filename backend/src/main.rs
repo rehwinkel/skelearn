@@ -88,14 +88,30 @@ async fn login(db: &Database, creds: &Credentials) -> eyre::Result<Option<String
     if let Some(user) = user_opt {
         if bcrypt::verify(&creds.passwd, &user.passwd_hash)? {
             let session = Session::new_random();
+            let old_sessions: Vec<&str> = user
+                .sessions
+                .iter()
+                .filter(|s| !s.is_valid())
+                .map(|s| s.token.as_str())
+                .collect();
             users
                 .update_one(
                     doc! { "username": &creds.username },
-                    doc! { "$push": { "sessions": to_document(&session)? } },
+                    doc! {
+                        "$pull": { "sessions": { "token": { "$in": old_sessions } } }
+                    },
                     None,
                 )
                 .await?;
-            // TODO: delete old sessions
+            users
+                .update_one(
+                    doc! { "username": &creds.username },
+                    doc! {
+                        "$push": { "sessions": to_document(&session)? },
+                    },
+                    None,
+                )
+                .await?;
             Ok(Some(session.token))
         } else {
             Ok(None)
