@@ -23,9 +23,9 @@ function Login() { //Guten Tag
         if (result === AuthResult.Ok) {
             setLocation("/dashboard", { replace: true });
         } else if (result === AuthResult.InvalidCreds) {
-            setError("Invalid credentials");
+            setError("Ungültige Zugangsdaten!");
         } else if (result === AuthResult.NoConnection) {
-            setError("No connection");
+            setError("Keine Verbindung!");
         }
     }
 

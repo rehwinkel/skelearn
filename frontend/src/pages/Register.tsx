@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "wouter";
-import { useAuth } from "../auth";
+import { Link, useLocation } from "wouter";
+import { apiRegister } from "../api";
 import Alert from "../components/Alert";
 import Button from "../components/Button";
 import Card from "../components/Card";
@@ -8,7 +8,7 @@ import Input from "../components/Input";
 import "./Register.scss";
 
 function Register() {
-    let auth = useAuth();
+    let [_, setLocation] = useLocation();
     let [loading, setLoading] = useState(false);
     let [username, setUsername] = useState("");
     let [password, setPassword] = useState("");
@@ -16,7 +16,25 @@ function Register() {
     let [error, setError] = useState<string | null>(null);
 
     async function register(e: any) {
-        e.preventDefault();
+        e.preventDefault(); // to avoid page reload
+        if (passwordRepeat !== password) {
+            setError("Passwortwiederholung falsch!");
+            return;
+        }
+        if (password.length < 8) {
+            setError("Passwortlänge muss mind. 8 sein!");
+            return;
+        }
+        setLoading(true);
+        let response = await apiRegister(username, password);
+        setLoading(false);
+        if (!response) {
+            setError("Keine Verbindung!");
+        } else if (response.ok) {
+            setLocation("/login");
+        } else {
+            setError("Nutzername bereits vergeben!");
+        }
     }
 
     return (
@@ -27,9 +45,9 @@ function Register() {
             {error === null ? null : <Alert>{error}</Alert>}
             <form onSubmit={register}>
                 <div className="login-form">
-                    <Input placeholder="Username" type="text" onChanged={(e) => { setUsername(e.target.value) }} />
-                    <Input placeholder="Password" type="password" onChanged={(e) => { setPassword(e.target.value) }} />
-                    <Input placeholder="Password (Wdh.)" type="password" onChanged={(e) => { setPasswordRepeat(e.target.value) }} />
+                    <Input placeholder="Username" type="text" onChanged={(e) => { setError(null); setUsername(e.target.value) }} />
+                    <Input placeholder="Password" type="password" onChanged={(e) => { setError(null); setPassword(e.target.value) }} />
+                    <Input placeholder="Password (Wdh.)" type="password" onChanged={(e) => { setError(null); setPasswordRepeat(e.target.value) }} />
                     <div className="login-buttons">
                         <Link to="/login">
                             <Button onClick={() => { }} inverted={true}>Login</Button>
