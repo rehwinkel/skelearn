@@ -3,8 +3,12 @@ import accurateSkeleton from "./accurate-skeleton.png";
 
 const endpoint = "http://localhost:8080/api/v1";
 
+function isString(x: any) {
+    return Object.prototype.toString.call(x) === "[object String]";
+}
+
 function post(path: string, headers: any, body?: any): Promise<Response> {
-    return fetch(endpoint + path, { method: "POST", mode: "cors", headers: { "Content-Type": "application/json", ...headers }, body: body !== undefined ? JSON.stringify(body) : undefined });
+    return fetch(endpoint + path, { method: "POST", mode: "cors", headers: { "Content-Type": "application/json", ...headers }, body: body !== undefined ? (isString(body) ? body : JSON.stringify(body)) : undefined });
 }
 
 function get(path: string, headers: any): Promise<Response> {
@@ -43,8 +47,14 @@ async function apiRegister(username: string, passwd: string): Promise<Response |
 }
 
 async function apiCheckToken(token: string) {
-    await new Promise(r => setTimeout(r, 500));
-    return true;
+    let response: Response;
+    try {
+        response = await post("/token", {}, token);
+        return response;
+    } catch (err: any) {
+        console.error(err);
+        return null;
+    }
 }
 
 interface AnatomyElement {

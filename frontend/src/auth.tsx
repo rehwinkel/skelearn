@@ -32,7 +32,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const fetch = async () => {
-            if (!await apiCheckToken(sessionCookie)) {
+            let response = await apiCheckToken(sessionCookie);
+            if (!response || !response.ok) {
                 setSession({ token: "" });
                 setSessionCookie("", { SameSite: "Strict" });
             } else {
