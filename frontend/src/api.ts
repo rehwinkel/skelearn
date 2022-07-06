@@ -57,8 +57,20 @@ async function apiCheckToken(token: string) {
     }
 }
 
+async function apiSubmitResult({ correct, wrong, slow }: { correct: Array<string>, wrong: Array<string>, slow: Array<string> }, token: string): Promise<Response | null> {
+    let response: Response;
+    try {
+        response = await post("/submitResult", {}, { correct, wrong, slow, token });
+        return response;
+    } catch (err: any) {
+        console.error(err);
+        return null;
+    }
+}
+
 interface AnatomyElement {
     name: string,
+    key: string,
     description: string,
     tip: string,
     img: any,
@@ -77,6 +89,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         radius: 90,
         img: goofySkeleton,
         name: "Nasenknochen",
+        key: "nose-bone",
         examModes: ["img", "text"],
         description: "Der Nasenknochen ist ein nonexistenter Knochen in der Nase.",
         tip: "Die Nase ist im Gesicht"
@@ -87,6 +100,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         radius: 160,
         img: goofySkeleton,
         name: "Handknochen",
+        key: "hand-bone",
         examModes: ["img", "text"],
         description: "Der Hand ist ein nonexistenter Knochen in der Nase.",
         tip: "Die Hand ist im Gesicht"
@@ -97,6 +111,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         radius: 125,
         img: accurateSkeleton,
         name: "Femur",
+        key: "femur",
         examModes: ["text"],
         description: "Der Femur ist im Leg.",
         tip: "Femur ist halt Oberschenkel."
@@ -121,6 +136,7 @@ export {
     apiLogin,
     apiRegister,
     apiCheckToken,
+    apiSubmitResult,
     apiGetAnatomy,
     apiGetCategories
 };

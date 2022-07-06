@@ -4,7 +4,7 @@ import { useState, useEffect, ReactNode } from "react";
 import colors from "../colors.module.scss";
 import Card from "../components/Card";
 import ZoomImage from "../components/ZoomImage";
-import { apiGetAnatomy, apiGetCategories } from "../api";
+import { apiGetAnatomy, apiGetCategories, apiSubmitResult } from "../api";
 import Button from "../components/Button";
 import { Link } from "wouter";
 import ProgressBar from "../components/ProgressBar";
@@ -12,6 +12,7 @@ import { mdiCheckCircleOutline, mdiClockOutline, mdiCloseCircleOutline, mdiInfor
 import Icon from "@mdi/react";
 import IconButton from "../components/IconButton";
 import Input from "../components/Input";
+import { useAuth } from "../auth";
 
 interface AnatomicStructure {
     centerX: number,
@@ -193,13 +194,25 @@ function ResultItem({ first, last, status, children }: { first: boolean, last: b
     );
 }
 
-// TODO: save the progress
 function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure> }) {
+    let auth = useAuth();
     let correctPercentage = Math.floor(100.0 * (correct.length / (correct.length + wrong.length + slow.length)));
     let correctWithStatus = correct.map(e => { (e as any).status = "correct"; return e; });
     let wrongWithStatus = wrong.map(e => { (e as any).status = "wrong"; return e; });
     let slowWithStatus = slow.map(e => { (e as any).status = "slow"; return e; });
     let resultsList: Array<any> = correctWithStatus.concat(slowWithStatus).concat(wrongWithStatus);
+
+    useEffect(() => {
+        const upload = async () => {
+            let result = {
+                correct: correct.map(r => r.key),
+                wrong: wrong.map(r => r.key),
+                slow: slow.map(r => r.key),
+            }
+            await apiSubmitResult(result, auth.session.token);
+        };
+        upload();
+    }, [correct, wrong, slow]);
 
     return (
         <div className="exam-results">
@@ -282,7 +295,7 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                         radius: elem.selectionRadius,
                         title: elem.name,
                         img: elem.img,
-                        key: elem.name,
+                        key: elem.key,
                         tip: elem.tip,
                         modes: elem.examModes
                     };

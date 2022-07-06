@@ -57,7 +57,7 @@ function Dashboard() {
                 <span className="dashboard-section-title">Kategorien</span>
                 <div className="dashboard-categories">
                     <Select options={categories.map(c => { return { key: c.name, name: c.name + " (" + c.elements.length + ")" }; })} onSelected={(e) => { setCategory(e.target.value); }}></Select>
-                    <IconButton icon={mdiPencil} onClick={() => { }}></IconButton>
+                    <Link to="/categories"><IconButton icon={mdiPencil} onClick={() => { }}></IconButton></Link>
                 </div>
                 {!category ?
                     <div style={{ marginTop: "8px" }}>
