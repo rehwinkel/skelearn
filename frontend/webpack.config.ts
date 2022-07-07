@@ -6,7 +6,7 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 
 const config: webpack.Configuration = {
-    devtool: "inline-source-map",
+    devtool: process.env.NODE_ENV === "development" ? "inline-source-map" : false,
     entry: './src/main.tsx',
     output: {
         path: path.resolve(__dirname, 'dist'),
