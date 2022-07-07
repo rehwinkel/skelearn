@@ -325,8 +325,9 @@ async fn results_handler(db: Data<Database>, token: String) -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> eyre::Result<()> {
-    println!("Server started!");
-    let client_opts = ClientOptions::parse("mongodb://127.0.0.1:27017").await?;
+    let url = std::env::var("MONGO_URL").unwrap_or(String::from("mongodb://127.0.0.1:27017"));
+    println!("Server started at '{}'!", url);
+    let client_opts = ClientOptions::parse(url).await?;
     let client = Client::with_options(client_opts)?;
     let db = client.database("skelearn");
     let db_data = Data::new(db);
