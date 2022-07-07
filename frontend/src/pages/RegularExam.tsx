@@ -1,5 +1,6 @@
 import "./RegularExam.scss";
 
+import React from "react";
 import { useState, useEffect, ReactNode } from "react";
 import colors from "../colors.module.scss";
 import Card from "../components/Card";

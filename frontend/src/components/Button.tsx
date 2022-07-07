@@ -1,5 +1,6 @@
 import './Button.scss'
 import { CSSProperties, MouseEvent } from "react";
+import React from "react";
 
 import colors from "../colors.module.scss";
 

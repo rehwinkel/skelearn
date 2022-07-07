@@ -1,5 +1,6 @@
 import "./Loading.scss";
 
+import React from "react";
 import { CSSProperties, ReactNode } from "react";
 import Spinner from "./Spinner";
 

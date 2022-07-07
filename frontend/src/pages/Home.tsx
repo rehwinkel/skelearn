@@ -2,6 +2,7 @@ import "./Home.scss";
 
 import Button from "../components/Button";
 import colors from "../colors.module.scss";
+import React from "react";
 
 import { Link } from "wouter";
 //Hiiiiiiiiiiiiii

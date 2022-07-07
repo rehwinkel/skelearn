@@ -4,8 +4,9 @@ import Card from "../components/Card";
 import ZoomImage from "../components/ZoomImage";
 import IconButton from "../components/IconButton";
 import { mdiArrowLeft, mdiArrowRight } from "@mdi/js";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { apiGetAnatomy, apiGetCategories } from "../api";
+import React from "react";
 
 interface AnatomicStructure {
     centerX: number,

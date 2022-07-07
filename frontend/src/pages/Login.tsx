@@ -6,6 +6,7 @@ import { useState } from "react";
 import Alert from "../components/Alert";
 import { AuthResult, useAuth } from "../auth";
 import Card from "../components/Card";
+import React from "react";
 
 function Login() { //Guten Tag
     let [_, setLocation] = useLocation();

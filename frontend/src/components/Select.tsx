@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+import React from "react";
 import "./Select.scss";
 
 function Select({ options, onSelected }: { options: Array<{ name: string, key: string }>, onSelected: (e: ChangeEvent<HTMLSelectElement>) => void }) {

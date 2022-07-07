@@ -1,4 +1,5 @@
 import "./Categories.scss";
+import React from "react";
 
 function Categories() {
     return (

@@ -3,6 +3,7 @@ import { mdiAlertCircleOutline } from "@mdi/js";
 import colors from "../colors.module.scss";
 import Icon from "@mdi/react";
 import { PropsWithChildren } from "react";
+import React from "react";
 
 function Alert(props: PropsWithChildren) {
     return (

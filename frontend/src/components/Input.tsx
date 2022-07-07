@@ -1,4 +1,5 @@
 import { ChangeEvent, CSSProperties, useState } from "react";
+import React from "react";
 import "./Input.scss";
 
 interface InputProps {

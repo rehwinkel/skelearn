@@ -3,6 +3,7 @@ import "./ZoomImage.scss";
 import colorAlpha from "color-alpha";
 import IconButton from "./IconButton";
 import { mdiArrowCollapse } from "@mdi/js";
+import React from "react";
 
 function getImageDimensions(src: any): Promise<{ width: number, height: number }> {
     return new Promise((resolve, reject) => {

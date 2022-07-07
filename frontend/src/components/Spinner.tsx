@@ -1,4 +1,5 @@
 import "./Spinner.scss";
+import React from "react";
 
 function Spinner({ size }: { size: "small" | "large" }) {
     return (

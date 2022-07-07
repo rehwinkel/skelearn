@@ -1,6 +1,7 @@
-import { mdiCheck, mdiCheckboxBlank, mdiCheckboxBlankOutline, mdiCheckboxMarked } from "@mdi/js";
+import { mdiCheckboxBlankOutline, mdiCheckboxMarked } from "@mdi/js";
 import Icon from "@mdi/react";
 import { ReactNode, useState } from "react";
+import React from "react";
 import "./Check.scss";
 import colors from "../colors.module.scss";
 

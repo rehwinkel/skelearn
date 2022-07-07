@@ -11,6 +11,7 @@ import { Link, useLocation } from "wouter";
 import Alert from "../components/Alert";
 import { apiGetAnatomy, apiGetCategories, apiGetResults } from "../api";
 import { useAuth } from "../auth";
+import React from "react";
 
 enum ExamMode {
     Regular,

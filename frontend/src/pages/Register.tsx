@@ -6,6 +6,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import Input from "../components/Input";
 import "./Register.scss";
+import React from "react";
 
 function Register() {
     let [_, setLocation] = useLocation();

@@ -2,6 +2,7 @@ import "./Card.scss";
 
 import { CSSProperties, ReactNode } from "react";
 import Loading from "../components/Loading";
+import React from "react";
 
 function Card({ children, loading, style, outerStyle }: { children: ReactNode, loading?: boolean, style?: CSSProperties, outerStyle?: CSSProperties }) {
     return (

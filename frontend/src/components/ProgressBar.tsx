@@ -1,4 +1,5 @@
 import "./ProgressBar.scss";
+import React from "react";
 
 function ProgressBar({ progress, color }: { progress: number, color?: string }) {
     let percent = Math.min(100, Math.round((progress || 0) * 100));
