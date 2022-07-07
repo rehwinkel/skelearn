@@ -1,14 +1,14 @@
 import goofySkeleton from "./goofy-skeleton.png";
 import accurateSkeleton from "./accurate-skeleton.png";
 
-const endpoint = "http://localhost:8080/api/v1";
+declare const API_URL: string;
 
 function isString(x: any) {
     return Object.prototype.toString.call(x) === "[object String]";
 }
 
 function request(method: string, path: string, headers: any, body?: any) {
-    return fetch(endpoint + path, { method: method, mode: "cors", headers: { "Content-Type": "application/json", ...headers }, body: body !== undefined ? (isString(body) ? body : JSON.stringify(body)) : undefined });
+    return fetch(API_URL + path, { method: method, mode: "cors", headers: { "Content-Type": "application/json", ...headers }, body: body !== undefined ? (isString(body) ? body : JSON.stringify(body)) : undefined });
 }
 
 function post(path: string, headers: any, body?: any): Promise<Response> {
