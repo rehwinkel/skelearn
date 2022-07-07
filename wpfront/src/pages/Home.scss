@@ -1,0 +1,60 @@
+@import '../colors.module.scss';
+
+.title-area {
+    background-color: lighten($accent-color, 24%);
+    height: 200px;
+    padding: 20px 10%;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.title {
+    color: $primary-text-color;
+    font-size: 80px;
+}
+
+.content-area {
+    margin: 0px 10%;
+    margin-bottom: 64px;
+}
+
+.slogan {
+    display: block;
+    font-size: 28px;
+    margin: 20px 0px;
+}
+
+.disclaimer {
+    display: block;
+    font-size: 16px;
+    margin: 20px 0px;
+    color: $error-color;
+    font-weight: bold;
+}
+
+.about-us-area {
+    text-align: right;
+    padding: 40px 10%;
+    background-color: lighten($primary-color, 50);
+}
+
+.about-us-title {
+    display: block;
+    font-size: 32px;
+}
+
+.about-us {
+    display: block;
+    font-size: 20px;
+    margin: 20px 0px;
+}
+
+.home-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.about-us-seperator {
+    flex-grow: 1;
+}

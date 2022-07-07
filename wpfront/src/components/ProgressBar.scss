@@ -1,0 +1,22 @@
+@import "../colors.module.scss";
+
+.progbar-container {
+    position: relative;
+    height: 16px;
+}
+
+.progbar-background {
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+    position: absolute;
+    background-color: #aaa;
+}
+
+.progbar-foreground {
+    height: 100%;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    position: absolute;
+    background-color: $primary-color;
+}

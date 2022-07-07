@@ -1,0 +1,86 @@
+@import "../colors.module.scss";
+
+.button-base {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 2px solid;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+}
+
+.button-base:hover {
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.35);
+    transition: 0.1s;
+}
+
+.button-small {
+    font-size: 16px;
+    border-radius: 16px;
+    padding: 9px 10px 11px 10px;
+    height: 48px;
+}
+
+.button-large {
+    font-size: 24px;
+    border-width: 3px;
+    border-radius: 24px;
+    padding: 12px 16px 12px 16px;
+    height: 64px;
+}
+
+.button-primary {
+    background-color: $primary-color;
+    border-color: $primary-color;
+}
+
+.button-primary:hover {
+    border-color: $primary-color-dark;
+}
+
+.button-primary:active {
+    background-color: $primary-color-dark;
+    border-color: $primary-color-dark;
+}
+
+.button-primary-inverted {
+    background-color: $primary-text-color;
+    border-color: $primary-text-color;
+}
+
+.button-primary-inverted:hover {
+    border-color: darken($primary-text-color, 20%);
+}
+
+.button-primary-inverted:active {
+    background-color: darken($primary-text-color, 20%);
+    border-color: darken($primary-text-color, 20%);
+}
+
+.button-accent {
+    background-color: $accent-color;
+    border-color: $accent-color;
+}
+
+.button-accent:hover {
+    border-color: $accent-color-dark;
+}
+
+.button-accent:active {
+    background-color: $accent-color-dark;
+    border-color: $accent-color-dark;
+}
+
+.button-accent-inverted {
+    background-color: $accent-text-color;
+    border-color: $accent-text-color;
+}
+
+.button-accent-inverted:hover {
+    border-color: darken($accent-text-color, 20%);
+}
+
+.button-accent-inverted:active {
+    background-color: darken($accent-text-color, 20%);
+    border-color: darken($accent-text-color, 20%);
+}

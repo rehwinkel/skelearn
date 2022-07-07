@@ -1,0 +1,72 @@
+@import "../colors.module.scss";
+
+.dashboard-container {
+    display: flex;
+    flex-direction: row;
+    column-gap: 5%;
+    justify-content: center;
+    margin: 0px 5%;
+
+    div {
+        flex: 1 1 0;
+    }
+}
+
+.dashboard-categories {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+}
+
+.dashboard-section-title {
+    display: block;
+    margin-top: 32px;
+    margin-bottom: 8px;
+    font-size: 18px;
+    color: $text-color;
+}
+
+.dashboard-mode-buttons {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+
+    * {
+        flex: 1 1 0;
+    }
+}
+
+.dashboard-test-settings {
+    display: flex;
+    flex-direction: column;
+    row-gap: 16px;
+}
+
+.learn-progress-heading {
+    display: flex;
+    flex-direction: row;
+
+    span {
+        font-size: 20px;
+    }
+}
+
+.learn-results-item-progress {
+    display: flex;
+    column-gap: 8px;
+    align-items: center;
+}
+
+.learn-result-list-item {
+    display: flex;
+    flex-direction: row;
+    border: 2px solid #ccc;
+    padding: 12px;
+    margin-bottom: 2px;
+}
+
+.learn-result-list-container {
+    overflow-y: scroll;
+    padding-right: 8px;
+    max-height: calc(100vh - 570px);
+}

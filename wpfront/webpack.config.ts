@@ -6,8 +6,7 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 
 const config: webpack.Configuration = {
-    mode: 'production',
-    devtool: "hidden-source-map",
+    devtool: "inline-source-map",
     entry: './src/main.tsx',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -44,7 +43,7 @@ const config: webpack.Configuration = {
                 ]
             },
             {
-                test: /\.svg$/,
+                test: /\.(svg|png)$/,
                 use: {
                     loader: "file-loader",
                     options: {
@@ -55,13 +54,17 @@ const config: webpack.Configuration = {
         ]
     },
     resolve: {
-        extensions: [".ts", ".tsx"]
+        extensions: [".ts", ".tsx", ".js"]
     },
     optimization: {
         minimizer: [
             "...",
             new CssMinimizerPlugin(),
         ],
+    },
+    devServer: {
+        port: 3000,
+        historyApiFallback: true,
     }
 };
 

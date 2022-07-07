@@ -1,0 +1,49 @@
+@import "../colors.module.scss";
+
+.input-container-inner {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+}
+
+.input-field {
+    border: 1px solid darken($primary-text-color, 20%);
+    border-radius: 16px;
+    padding: 16px 12px;
+    font-size: 16px;
+    font-family: inherit;
+    flex-grow: 1;
+    display: block;
+    background-color: #f0f0f0;
+}
+
+.input-field:hover {
+    background-color: #e8e8e8;
+}
+
+.input-field:active {
+    background-color: #ddd;
+}
+
+.placeholder {
+    font-size: 16px;
+    position: absolute;
+    left: 13px;
+    top: 17px;
+    z-index: 5;
+    user-select: none;
+    pointer-events: none;
+    color: transparentize($text-color, 0.3);
+    transition: 0.25s;
+}
+
+input[type]:focus {
+    outline: 0 none;
+}
+
+.placeholder-moved {
+    top: 6px;
+    font-size: 10px;
+    color: transparentize($primary-color, 0.3);
+}
