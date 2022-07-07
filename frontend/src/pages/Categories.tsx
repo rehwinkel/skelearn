@@ -1,4 +1,5 @@
 import "./Categories.scss";
+<<<<<<< HEAD
 import Card from "../components/Card";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -20,6 +21,12 @@ function Categories() {
                 </Link>
             </Card>
         </div>
+=======
+
+function Categories() {
+    return (
+        <div>Categories you fucking dipshit</div>
+>>>>>>> 5d672037c48d928d9d0850717785f241304725cc
     );
 }
 

@@ -7,7 +7,7 @@ import Alert from "../components/Alert";
 import { AuthResult, useAuth } from "../auth";
 import Card from "../components/Card";
 
-function Login() {
+function Login() { //Guten Tag
     let [_, setLocation] = useLocation();
     let auth = useAuth();
     let [loading, setLoading] = useState(false);
@@ -23,9 +23,9 @@ function Login() {
         if (result === AuthResult.Ok) {
             setLocation("/dashboard", { replace: true });
         } else if (result === AuthResult.InvalidCreds) {
-            setError("Invalid credentials");
+            setError("Ungültige Zugangsdaten!");
         } else if (result === AuthResult.NoConnection) {
-            setError("No connection");
+            setError("Keine Verbindung!");
         }
     }
 

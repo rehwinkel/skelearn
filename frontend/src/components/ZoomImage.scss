@@ -7,10 +7,17 @@
     user-select: none;
     overflow: hidden;
 
-    * {
+    img {
         pointer-events: none;
         position: absolute;
     }
+}
+
+.marker {
+    position: absolute;
+    z-index: 10;
+    border: 5px solid red;
+    border-radius: 100%;
 }
 
 .zoom-image-border {

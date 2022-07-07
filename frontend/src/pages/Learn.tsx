@@ -1,12 +1,11 @@
-import Card from "../components/Card";
 import "./Learn.scss";
 
-import accurateSkel from "../accurate-skeleton.png";
-import accurateSkelSide from "../accurate-skeleton-side.png";
-import IconButton from "../components/IconButton";
-import { mdiArrowCollapse, mdiArrowLeft, mdiArrowRight, mdiMoveResize, mdiSetCenter } from "@mdi/js";
+import Card from "../components/Card";
 import ZoomImage from "../components/ZoomImage";
-import { useEffect, useState } from "react";
+import IconButton from "../components/IconButton";
+import { mdiArrowLeft, mdiArrowRight } from "@mdi/js";
+import { useEffect, useReducer, useState } from "react";
+import { apiGetAnatomy, apiGetCategories } from "../api";
 
 interface AnatomicStructure {
     centerX: number,
@@ -17,56 +16,45 @@ interface AnatomicStructure {
     img: any,
 }
 
-function Learn() {
-    let [currentStructure, setCurrentStructure] = useState<AnatomicStructure>(null!);
-    let structures: Array<AnatomicStructure> = [
-        {
-            centerX: 730,
-            centerY: 1130,
-            radius: 125,
-            title: "Femur",
-            description: "Der <b>Femur</b> ist der geilste Knochen im Oberschenkel.\nEr besteht aus Knochen.",
-            img: accurateSkel,
-        },
-        {
-            centerX: 215,
-            centerY: 570,
-            radius: 105,
-            title: "Humerus",
-            description: "Der Humerus, auch als LMAO-Knochen bekannt, kostet etwa 6,50€.",
-            img: accurateSkel,
-        },
-        {
-            centerX: 290,
-            centerY: 540,
-            radius: 210,
-            title: "Skull",
-            description: "Das ist halt einfach ein Kopf du Dickschädel.",
-            img: accurateSkelSide,
-        },
-        {
-            centerX: 300,
-            centerY: 510,
-            radius: 15,
-            title: "Tear",
-            description: "Sad :(",
-            img: accurateSkelSide,
-        }
-    ];
+function Learn({ category }: { category: string }) {
+    let [currentIndex, setCurrentIndex] = useState<number>(0);
+    let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
 
     useEffect(() => {
-        setTimeout(() => {
-            setCurrentStructure(structures[3]);
-        }, 1000);
-    }, [setCurrentStructure]);
+        const getInfo = async () => {
+            let rawData = await apiGetAnatomy();
+            let categories = await apiGetCategories();
+            let foundCategory = categories.find(c => c.name === category)!;
+
+            setStructures(rawData.filter(elem => foundCategory.elements.includes(elem.name)).map(
+                elem => {
+                    return {
+                        centerX: elem.imgPosX,
+                        centerY: elem.imgPosY,
+                        radius: elem.radius,
+                        title: elem.name,
+                        description: elem.description,
+                        img: elem.img
+                    };
+                }
+            ));
+        };
+        getInfo();
+    }, [setStructures]);
+
+    let currentStructure = structures.length > 0 ? structures[currentIndex] : null;
+
+    function next(c: number) {
+        setCurrentIndex((currentIndex + c + structures.length) % structures.length);
+    }
 
     return (
-        <Card style={{ width: "80%" }} loading={currentStructure === null}>
+        <Card style={{ width: "60%" }} loading={currentStructure === null}>
             <div style={{ textAlign: "center" }}>
                 <span className="card-title">Lernmodus</span>
             </div>
             <div className="learn-container">
-                <div style={{ height: "max(300px, calc(100vh - 370px))" }}>
+                <div style={{ flexGrow: 2, height: "max(300px, calc(100vh - 370px))" }}>
                     <ZoomImage
                         src={currentStructure?.img}
                         position={!!currentStructure ? {
@@ -83,11 +71,10 @@ function Learn() {
                                 {currentStructure?.description || "Loading..."}
                             </p>
                         </div>
-                        <IconButton icon={mdiArrowCollapse} onClick={() => { }}></IconButton>
                     </div>
                     <div className="learn-button-spacer"></div>
                     <div className="learn-buttons">
-                        <IconButton icon={mdiArrowLeft} onClick={() => { }}></IconButton>
+                        <IconButton icon={mdiArrowLeft} onClick={() => { next(-1); }}></IconButton>
                         <span>
                             <span>Previous</span>
                         </span>
@@ -96,7 +83,7 @@ function Learn() {
                         <span>
                             <span>Next</span>
                         </span>
-                        <IconButton icon={mdiArrowRight} onClick={() => { }}></IconButton>
+                        <IconButton icon={mdiArrowRight} onClick={() => { next(1); }}></IconButton>
                     </div>
                 </div>
             </div>
