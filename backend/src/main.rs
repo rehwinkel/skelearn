@@ -325,6 +325,7 @@ async fn results_handler(db: Data<Database>, token: String) -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> eyre::Result<()> {
+    println!("Server started!");
     let client_opts = ClientOptions::parse("mongodb://127.0.0.1:27017").await?;
     let client = Client::with_options(client_opts)?;
     let db = client.database("skelearn");
@@ -343,7 +344,7 @@ async fn main() -> eyre::Result<()> {
                     .route("/results", web::post().to(results_handler)),
             )
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await?;
     Ok(())
