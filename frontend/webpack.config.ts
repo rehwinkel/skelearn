@@ -21,7 +21,7 @@ const config: (_: any, args: any) => webpack.Configuration = (_, args) => {
             }),
             new HtmlWebpackPlugin({ template: "./src/index.html", favicon: "./src/logo.svg", inject: true }),
             new webpack.DefinePlugin({
-                API_URL: args.mode === "development" ? JSON.stringify("http://localhost:8080/api/v1") : JSON.stringify("http://localhost/api/v1"),
+                API_URL: args.mode === "development" ? JSON.stringify("http://localhost:8080/api/v1") : JSON.stringify("https://skelearn.de/api/v1"),
             }),
         ],
         module: {
