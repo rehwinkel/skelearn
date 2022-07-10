@@ -17,4 +17,5 @@ RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/g' /usr/local
 RUN sed -i 's/#LoadModule proxy_module/LoadModule proxy_module/g' /usr/local/apache2/conf/httpd.conf
 RUN sed -i 's/#LoadModule proxy_http_module/LoadModule proxy_http_module/g' /usr/local/apache2/conf/httpd.conf
 
+COPY images/ /var/www/img/
 COPY --from=build /build/dist /var/www/html/

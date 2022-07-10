@@ -1,6 +1,3 @@
-import goofySkeleton from "./goofy-skeleton.png";
-import accurateSkeleton from "./accurate-skeleton.png";
-
 declare const API_URL: string;
 
 function isString(x: any) {
@@ -98,7 +95,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         imgPosY: 431,
         selectionRadius: 35,
         radius: 90,
-        img: goofySkeleton,
+        img: "/res/goofy-skeleton.png",
         name: "Nasenknochen",
         key: "nose-bone",
         examModes: ["img", "text"],
@@ -109,7 +106,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         imgPosY: 974,
         selectionRadius: 80,
         radius: 160,
-        img: goofySkeleton,
+        img: "/res/goofy-skeleton.png",
         name: "Handknochen",
         key: "hand-bone",
         examModes: ["img", "text"],
@@ -120,7 +117,7 @@ async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
         imgPosY: 1130,
         selectionRadius: 60,
         radius: 125,
-        img: accurateSkeleton,
+        img: "/res/accurate-skeleton.png",
         name: "Femur",
         key: "femur",
         examModes: ["text"],
