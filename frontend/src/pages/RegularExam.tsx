@@ -284,12 +284,16 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
 
     useEffect(() => {
         const getInfo = async () => {
-            let rawData = await apiGetAnatomy();
+            let resp = await apiGetAnatomy();
+            let rawData = null;
+            if (resp.ok) {
+                rawData = await resp.json();
+            }
             let categories = await apiGetCategories();
-            let foundCategory = categories.find(c => c.name === category)!;
+            let foundCategory = categories.find(c => c.key === category)!;
 
-            setStructures(rawData.filter(elem => foundCategory.elements.includes(elem.name)).map(
-                elem => {
+            setStructures(rawData.filter((elem: any) => foundCategory.elements.includes(elem.key)).map(
+                (elem: any) => {
                     return {
                         centerX: elem.imgPosX,
                         centerY: elem.imgPosY,

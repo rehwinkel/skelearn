@@ -14,7 +14,7 @@ use mongodb::{
     Client, Collection, Database, IndexModel,
 };
 use rand_chacha::rand_core::{RngCore, SeedableRng};
-use serde::{Deserialize, Serialize};
+use serde::{de::Visitor, ser::SerializeSeq, Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
 struct Credentials {
@@ -51,6 +51,116 @@ struct User {
     passwd_hash: String,
     sessions: Vec<Session>,
     results: Vec<ExamResults>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum AnatomicExamMode {
+    Text,
+    Image,
+    TextImage,
+    None,
+}
+
+impl Serialize for AnatomicExamMode {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let len = match self {
+            Self::Text | Self::Image => 1,
+            Self::TextImage => 2,
+            _ => 0,
+        };
+        let mut seq = serializer.serialize_seq(Some(len))?;
+        if self == &Self::Text || self == &Self::TextImage {
+            seq.serialize_element("text")?;
+        }
+        if self == &Self::Image || self == &Self::TextImage {
+            seq.serialize_element("img")?;
+        }
+        seq.end()
+    }
+}
+
+struct ExamModeVisitor;
+
+impl<'de> Visitor<'de> for ExamModeVisitor {
+    type Value = AnatomicExamMode;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("a list of up to two strings, containg \"img\" and/or \"text\"")
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        struct ChildVisitor;
+
+        impl<'dec> Visitor<'dec> for ChildVisitor {
+            type Value = u8;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("either \"img\" or \"text\"")
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(match v {
+                    "text" => 1,
+                    "img" => 2,
+                    _ => 0,
+                })
+            }
+        }
+
+        let mut text = false;
+        let mut img = false;
+
+        while let Some(el) = seq.next_element::<&str>()? {
+            if el == "text" {
+                text = true;
+            }
+            if el == "img" {
+                img = true;
+            }
+        }
+        Ok(match (text, img) {
+            (true, true) => AnatomicExamMode::TextImage,
+            (true, false) => AnatomicExamMode::Text,
+            (false, true) => AnatomicExamMode::Image,
+            (false, false) => AnatomicExamMode::None,
+        })
+    }
+}
+
+impl<'de> Deserialize<'de> for AnatomicExamMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(ExamModeVisitor)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct AnatomicStructure {
+    #[serde(rename = "imgPosX")]
+    img_pos_x: u64,
+    #[serde(rename = "imgPosY")]
+    img_pos_y: u64,
+    #[serde(rename = "selectionRadius")]
+    selection_radius: u64,
+    radius: u64,
+    img: String,
+    name: String,
+    key: String,
+    description: String,
+    #[serde(rename = "examModes")]
+    exam_modes: AnatomicExamMode,
+    tip: String,
 }
 
 impl Session {
@@ -245,8 +355,8 @@ async fn get_results(db: &Database, token: &String) -> eyre::Result<Option<Resul
     }
 }
 
-async fn login_handler(db: Data<Database>, credentials: web::Json<Credentials>) -> HttpResponse {
-    match login(&db, &credentials).await {
+async fn login_handler(data: Data<AppData>, credentials: web::Json<Credentials>) -> HttpResponse {
+    match login(&data.db, &credentials).await {
         Ok(token_opt) => {
             if let Some(token) = token_opt {
                 HttpResponse::Ok().body(token)
@@ -261,8 +371,11 @@ async fn login_handler(db: Data<Database>, credentials: web::Json<Credentials>) 
     }
 }
 
-async fn register_handler(db: Data<Database>, credentials: web::Json<Credentials>) -> HttpResponse {
-    match register(&db, &credentials).await {
+async fn register_handler(
+    data: Data<AppData>,
+    credentials: web::Json<Credentials>,
+) -> HttpResponse {
+    match register(&data.db, &credentials).await {
         Ok(result) => {
             if result {
                 HttpResponse::Ok().finish()
@@ -277,8 +390,8 @@ async fn register_handler(db: Data<Database>, credentials: web::Json<Credentials
     }
 }
 
-async fn check_token_handler(db: Data<Database>, token: String) -> HttpResponse {
-    match check_token(&db, &token).await {
+async fn check_token_handler(data: Data<AppData>, token: String) -> HttpResponse {
+    match check_token(&data.db, &token).await {
         Ok(result) => {
             if result.is_some() {
                 HttpResponse::Ok().finish()
@@ -294,10 +407,10 @@ async fn check_token_handler(db: Data<Database>, token: String) -> HttpResponse 
 }
 
 async fn submit_result_handler(
-    db: Data<Database>,
+    data: Data<AppData>,
     submission: web::Json<ResultSubmission>,
 ) -> HttpResponse {
-    match submit_result(&db, &submission).await {
+    match submit_result(&data.db, &submission).await {
         Ok(result) => {
             if result {
                 HttpResponse::Ok().finish()
@@ -312,8 +425,8 @@ async fn submit_result_handler(
     }
 }
 
-async fn results_handler(db: Data<Database>, token: String) -> HttpResponse {
-    match get_results(&db, &token).await {
+async fn results_handler(data: Data<AppData>, token: String) -> HttpResponse {
+    match get_results(&data.db, &token).await {
         Ok(Some(result)) => HttpResponse::Ok().body(serde_json::to_string(&result).unwrap()),
         Ok(None) => HttpResponse::Unauthorized().finish(),
         Err(e) => {
@@ -323,14 +436,26 @@ async fn results_handler(db: Data<Database>, token: String) -> HttpResponse {
     }
 }
 
+async fn anatomy_handler(data: Data<AppData>) -> HttpResponse {
+    HttpResponse::Ok().body(serde_json::to_string(&data.data).unwrap())
+}
+
+struct AppData {
+    db: Database,
+    data: Vec<AnatomicStructure>,
+}
+
 #[actix_web::main]
 async fn main() -> eyre::Result<()> {
+    let data_json = include_str!("data.json");
+    let data: Vec<AnatomicStructure> = serde_json::from_str(data_json)?;
+
     let url = std::env::var("MONGO_URL").unwrap_or(String::from("mongodb://127.0.0.1:27017"));
     println!("Server started at '{}'!", url);
     let client_opts = ClientOptions::parse(url).await?;
     let client = Client::with_options(client_opts)?;
     let db = client.database("skelearn");
-    let db_data = Data::new(db);
+    let db_data = Data::new(AppData { db, data });
 
     HttpServer::new(move || {
         App::new()
@@ -342,7 +467,8 @@ async fn main() -> eyre::Result<()> {
                     .route("/register", web::post().to(register_handler))
                     .route("/token", web::post().to(check_token_handler))
                     .route("/submitResult", web::post().to(submit_result_handler))
-                    .route("/results", web::post().to(results_handler)),
+                    .route("/results", web::post().to(results_handler))
+                    .route("/anatomy", web::get().to(anatomy_handler)),
             )
     })
     .bind(("0.0.0.0", 8080))?

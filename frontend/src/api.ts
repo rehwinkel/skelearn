@@ -12,6 +12,10 @@ function post(path: string, headers: any, body?: any): Promise<Response> {
     return request("POST", path, headers, body);
 }
 
+function get(path: string, headers: any, body?: any): Promise<Response> {
+    return request("GET", path, headers, body);
+}
+
 async function hashPasswd(passwd: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(passwd);
@@ -89,53 +93,45 @@ interface AnatomyElement {
     examModes: Array<"img" | "text">,
 }
 
-async function apiGetAnatomy(): Promise<Array<AnatomyElement>> {
-    return [{
-        imgPosX: 777,
-        imgPosY: 431,
-        selectionRadius: 35,
-        radius: 90,
-        img: "/res/goofy-skeleton.png",
-        name: "Nasenknochen",
-        key: "nose-bone",
-        examModes: ["img", "text"],
-        description: "Der Nasenknochen ist ein nonexistenter Knochen in der Nase.",
-        tip: "Die Nase ist im Gesicht"
-    }, {
-        imgPosX: 1332,
-        imgPosY: 974,
-        selectionRadius: 80,
-        radius: 160,
-        img: "/res/goofy-skeleton.png",
-        name: "Handknochen",
-        key: "hand-bone",
-        examModes: ["img", "text"],
-        description: "Der Hand ist ein nonexistenter Knochen in der Nase.",
-        tip: "Die Hand ist im Gesicht"
-    }, {
-        imgPosX: 730,
-        imgPosY: 1130,
-        selectionRadius: 60,
-        radius: 125,
-        img: "/res/accurate-skeleton.png",
-        name: "Femur",
-        key: "femur",
-        examModes: ["text"],
-        description: "Der Femur ist im Leg.",
-        tip: "Femur ist halt Oberschenkel."
-    }];
+async function apiGetAnatomy(): Promise<Response | null> {
+    let response: Response;
+    try {
+        response = await get("/anatomy", {});
+        return response;
+    } catch (err: any) {
+        console.error(err);
+        return null;
+    }
 }
 
 interface Category {
     name: string,
+    key: string,
     elements: Array<string>,
 }
 
 async function apiGetCategories(): Promise<Array<Category>> {
     return [
         {
-            name: "Hauptknochen",
-            elements: ["Femur", "Handknochen", "Nasenknochen"]
+            name: "Alle Knochen",
+            key: "all",
+            elements: [
+                "vertebrae_cervicales", "sternum", "os_cuboideum", "os_cuneiforme_laterale",
+                "os_hamatum", "viscerocranium", "columna_vertebralis", "os_sacrum", "fibula",
+                "stapes", "ulna", "calcaneus", "partella", "os_lacrimale", "os_femoris",
+                "os_ilium", "axis", "humerus", "os_scaphoideum", "scapula", "maxilla",
+                "os_nasale", "os_occipitale", "talus", "os_lunatum", "os_trapezoideum",
+                "vomer", "vertebrae_lumbales", "radius", "os_zygomatikum", "incus", "atlas",
+                "neurocranium", "os_parietale", "ossa_metacarpi", "digitus_phalanx_distalis",
+                "mandibular", "costae", "cranium", "os_pubis", "os_ischii", "digitus_phalanx_media",
+                "os_trapezium", "os_ethmoidale", "digitus_pedis_phalanx_distalis", "malleus",
+                "os_pisiforme", "digitus_phalanx_proximalis", "os_cuneiforme_mediale",
+                "tibia", "os_hyoideum", "os_coccygi", "digitus_pedis_phalanx_media",
+                "os_frontale", "os_temporale", "cingulum_membri_superioris", "os_triquetrum",
+                "os_coxae", "os_sphenoidale", "os_capitatum", "vertebrae_thoracice",
+                "os_naviculare", "digitus_pedis_phalanx_proximalis", "os_cuneiforme_intermedium",
+                "clavicula", "carpus", "ossa_metatarsi"
+            ]
         }
     ];
 }

@@ -20,6 +20,7 @@ enum ExamMode {
 
 interface Category {
     name: string,
+    key: string,
     elements: Array<string>,
 }
 
@@ -64,7 +65,11 @@ function Dashboard() {
 
     useEffect(() => {
         let getInfo = async () => {
-            setStructures(await apiGetAnatomy());
+            let resp = await apiGetAnatomy();
+            if (resp.ok) {
+                let anatomy = await resp.json();
+                setStructures(anatomy);
+            }
         };
         getInfo();
     }, [setStructures]);
@@ -123,7 +128,7 @@ function Dashboard() {
                 </div>
                 <span className="dashboard-section-title">Kategorien</span>
                 <div className="dashboard-categories">
-                    <Select options={categories.map(c => { return { key: c.name, name: c.name + " (" + c.elements.length + ")" }; })} onSelected={(e) => { setCategory(e.target.value); }}></Select>
+                    <Select options={categories.map(c => { return { key: c.key, name: c.name + " (" + c.elements.length + ")" }; })} onSelected={(e) => { setCategory(e.target.value); }}></Select>
                     <Link to="/categories"><IconButton icon={mdiPencil} onClick={() => { }}></IconButton></Link>
                 </div>
                 {!category ?
