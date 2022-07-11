@@ -19,6 +19,7 @@ interface AnatomicStructure {
     centerX: number,
     centerY: number,
     radius: number,
+    selectionRadius: number,
     title: string,
     img: any,
     tip: string,
@@ -58,7 +59,7 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
             return {
                 centerX: str.centerX,
                 centerY: str.centerY,
-                radius: str.radius,
+                radius: str.selectionRadius,
                 markerWidth: 3,
                 markerColor: colors["accent-color"],
                 clickable: true,
@@ -113,7 +114,11 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
             <div style={{ height: "max(300px, calc(100vh - 370px))", flexGrow: 2 }}>
                 <ZoomImage
                     src={currentStructure?.img}
-                    position={currentStructure ? { x: currentStructure?.centerX, y: currentStructure?.centerY, size: currentStructure?.radius * 2 } : undefined} />
+                    position={!!currentStructure ? {
+                        x: currentStructure.centerX,
+                        y: currentStructure.centerY,
+                        size: currentStructure.radius,
+                    } : undefined} />
             </div>
             <div className="learn-right">
                 <div style={{ display: "flex" }}>
@@ -297,7 +302,8 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                     return {
                         centerX: elem.imgPosX,
                         centerY: elem.imgPosY,
-                        radius: elem.selectionRadius,
+                        radius: elem.radius,
+                        selectionRadius: elem.selectionRadius,
                         title: elem.name,
                         img: elem.img,
                         key: elem.key,
