@@ -7,11 +7,14 @@ RUN yarn install
 
 COPY tsconfig.json babel.config.js webpack.config.ts ./
 COPY src/ ./src/
-RUN yarn build
+ARG SKELEARN_HOST
+RUN SKELEARN_HOST=$SKELEARN_HOST yarn build
 
 FROM httpd:2.4-bullseye
 
-COPY skelearn.conf /usr/local/apache2/conf/
+COPY skelearn.conf /tmp/
+ARG SKELEARN_HOST
+RUN cat /tmp/skelearn.conf | sed "s/SKELEARN_HOST/${SKELEARN_HOST}/g" > /usr/local/apache2/conf/skelearn.conf
 RUN echo "Include conf/skelearn.conf" >> /usr/local/apache2/conf/httpd.conf
 RUN sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/g' /usr/local/apache2/conf/httpd.conf
 RUN sed -i 's/#LoadModule proxy_module/LoadModule proxy_module/g' /usr/local/apache2/conf/httpd.conf

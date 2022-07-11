@@ -1,6 +1,9 @@
 services:
   frontend:
-    build: "./frontend/."
+    build: 
+      context: "./frontend/."
+      args:
+        - SKELEARN_HOST=localhost
     ports:
       - "80:80"
       - "443:443"

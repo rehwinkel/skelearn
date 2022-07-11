@@ -6,6 +6,10 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 
 const config: (_: any, args: any) => webpack.Configuration = (_, args) => {
+    let SKELEARN_HOST = process.env["SKELEARN_HOST"];
+    if (args.mode === "production") {
+        console.log("Using host '" + SKELEARN_HOST + "' for production build.");
+    }
     return {
         devtool: args.mode === "development" ? "inline-source-map" : false,
         entry: './src/main.tsx',
@@ -21,7 +25,7 @@ const config: (_: any, args: any) => webpack.Configuration = (_, args) => {
             }),
             new HtmlWebpackPlugin({ template: "./src/index.html", favicon: "./src/logo.svg", inject: true }),
             new webpack.DefinePlugin({
-                API_URL: args.mode === "development" ? JSON.stringify("http://localhost:8080/api/v1") : JSON.stringify("https://skelearn.de/api/v1"),
+                API_URL: args.mode === "development" ? JSON.stringify("http://localhost:8080/api/v1") : JSON.stringify("https://" + SKELEARN_HOST + "/api/v1"),
             }),
         ],
         module: {
