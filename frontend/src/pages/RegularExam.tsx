@@ -14,6 +14,7 @@ import Icon from "@mdi/react";
 import IconButton from "../components/IconButton";
 import Input from "../components/Input";
 import { useAuth } from "../auth";
+import seedrandom from "seedrandom";
 
 interface AnatomicStructure {
     centerX: number,
@@ -109,10 +110,21 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
     let [showHint, setShowHint] = useState(false);
     let [submission, setSubmission] = useState("");
 
+    console.log(currentStructure);
+
     return (
         <div className="learn-container">
             <div style={{ height: "max(300px, calc(100vh - 370px))", flexGrow: 2 }}>
                 <ZoomImage
+                    pMarkers={!!currentStructure ? [{
+                        centerX: currentStructure.centerX,
+                        centerY: currentStructure.centerY,
+                        radius: currentStructure.selectionRadius / 10,
+                        markerWidth: 1,
+                        markerColor: colors["error-color"],
+                        clickable: false,
+                        onClick: null,
+                    }] : undefined}
                     src={currentStructure?.img}
                     position={!!currentStructure ? {
                         x: currentStructure.centerX,
@@ -367,7 +379,21 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
             let categories = await apiGetCategories();
             let foundCategory = categories.find(c => c.key === category)!;
 
-            setStructures(rawData.filter((elem: any) => foundCategory.elements.includes(elem.key)).map(
+            let half_secs = Math.round(Date.now() / 2000);
+            let rng = seedrandom(half_secs.toString());
+
+            function shuffle(a: Array<any>) {
+                var j, x, i;
+                for (i = a.length - 1; i > 0; i--) {
+                    j = Math.floor(rng() * (i + 1));
+                    x = a[i];
+                    a[i] = a[j];
+                    a[j] = x;
+                }
+                return a;
+            }
+
+            let matchingStructures = rawData.filter((elem: any) => foundCategory.elements.includes(elem.key)).map(
                 (elem: any) => {
                     return {
                         centerX: elem.imgPosX,
@@ -381,7 +407,9 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                         modes: elem.examModes
                     };
                 }
-            ));
+            );
+            console.log("setstrcututreurss");
+            setStructures(shuffle(matchingStructures));
         };
         getInfo();
     }, [setStructures]);
@@ -423,6 +451,10 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
             }
         }
     }
+
+    useEffect(() => {
+        console.log(currentStructure);
+    }, [currentStructure]);
 
     return (
         <Card style={{ width: "60%" }} loading={structures.length === 0}>
