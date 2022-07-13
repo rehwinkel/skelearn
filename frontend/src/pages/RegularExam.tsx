@@ -105,7 +105,7 @@ function testUserSubmission(structure: AnatomicStructure, name: string): boolean
     return structure.title.toLowerCase() === name.toLowerCase();
 }
 
-function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout }: { currentStructure?: AnatomicStructure, timed: boolean, onSuccess: () => void, onFailure: () => void, onTimeout: () => void }) {
+function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout }: { currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
     let [showHint, setShowHint] = useState(false);
     let [submission, setSubmission] = useState("");
 
@@ -124,16 +124,18 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
                         <span className="exam-prompt">Was ist der Name des angezeigten Knochens?</span>
-                        <div className="exam-text-mode-submit">
-                            <Input onChanged={e => { setSubmission(e.target.value); }}></Input>
-                            <Button onClick={() => {
-                                if (testUserSubmission(currentStructure!, submission)) {
-                                    onSuccess();
-                                } else {
-                                    onFailure();
-                                }
-                            }}>Absenden</Button>
-                        </div>
+                        <form onSubmit={() => {
+                            if (testUserSubmission(currentStructure!, submission)) {
+                                onSuccess(submission);
+                            } else {
+                                onFailure(submission);
+                            }
+                        }}>
+                            <div className="exam-text-mode-submit">
+                                <Input autoFocus onChanged={e => { setSubmission(e.target.value); }}></Input>
+                                <Button type="submit" onClick={() => { }}>Absenden</Button>
+                            </div>
+                        </form>
                         <div className="exam-hint-container">
                             <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
                             {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
@@ -143,7 +145,7 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
                 <div className="learn-button-spacer"></div>
                 {timed ? <Timer timerSeconds={10} onElapsed={() => {
                     if (testUserSubmission(currentStructure!, submission)) {
-                        onSuccess();
+                        onSuccess(submission);
                     } else {
                         onTimeout();
                     }
@@ -153,29 +155,96 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
     );
 }
 
-function Correct({ next }: { next: (e: any) => void }) {
+const quotes_correct = [
+    "Omg du bist der geilste, Bruder! Du hast voll recht mit \"{correct}\"!!!"
+];
+
+const quotes_empty = [
+    "Du hast garnix eingegeben digga, eigentlich wäre es \"{correct}\", smh....."
+];
+
+const quotes_wrong = [
+    "Meine Güte, das ist doch nicht \"{wrong}\", das ist \"{correct}\", smh....."
+];
+
+const quotes_slow = [
+    "Das war ja eigentlich der \"{correct}\", aber du hast ja noch gewartet dass die Schnecke die Straße überquert."
+];
+
+function Correct({ next, structure }: { next: (e: any) => void, structure: AnatomicStructure }) {
+    const select = (list: any) => {
+        let i = Math.round(Math.random() * (list.length - 1));
+        return list[i];
+    }
+
+    let text = select(quotes_correct);
+
+    function cont(e: any) {
+        e.preventDefault();
+        next(e);
+    }
+
     return (
         <div>
-            Das ist sau richtig Bro!
-            <Button onClick={next}>Nächste</Button>
+            <span style={{ fontSize: "28px" }}>{text.replace("{correct}", structure.title)}</span>
+            <div style={{ display: "flex", flexDirection: "row", marginTop: "32px" }}>
+                <div style={{ flexGrow: 1 }}></div>
+                <form onSubmit={cont}>
+                    <Button autoFocus type="submit" size="large" color="accent" onClick={() => { }}>Nächste</Button>
+                </form>
+            </div>
         </div>
     );
 }
 
-function Wrong({ next }: { next: (e: any) => void }) {
+function Wrong({ next, structure, submission }: { next: (e: any) => void, structure: AnatomicStructure, submission: any }) {
+    const select = (list: any) => {
+        let i = Math.round(Math.random() * (list.length - 1));
+        return list[i];
+    }
+
+    let text = select(submission ? quotes_wrong : quotes_empty);
+
+    function cont(e: any) {
+        e.preventDefault();
+        next(e);
+    }
+
     return (
         <div>
-            Du dummer Bastard!
-            <Button onClick={next}>Nächste</Button>
+            <span style={{ fontSize: "28px" }}>{text.replace("{wrong}", submission).replace("{correct}", structure.title)}</span>
+            <div style={{ display: "flex", flexDirection: "row", marginTop: "32px" }}>
+                <div style={{ flexGrow: 1 }}></div>
+                <form onSubmit={cont}>
+                    <Button autoFocus type="submit" size="large" color="accent" onClick={() => { }}>Nächste</Button>
+                </form>
+            </div>
         </div>
     );
 }
 
-function Timeout({ next }: { next: (e: any) => void }) {
+function Timeout({ next, structure }: { next: (e: any) => void, structure: AnatomicStructure }) {
+    const select = (list: any) => {
+        let i = Math.round(Math.random() * (list.length - 1));
+        return list[i];
+    }
+
+    let text = select(quotes_slow);
+
+    function cont(e: any) {
+        e.preventDefault();
+        next(e);
+    }
+
     return (
         <div>
-            Du bist langsamer als meine verstorbene Großmutter!
-            <Button onClick={next}>Nächste</Button>
+            <span style={{ fontSize: "28px" }}>{text.replace("{correct}", structure.title)}</span>
+            <div style={{ display: "flex", flexDirection: "row", marginTop: "32px" }}>
+                <div style={{ flexGrow: 1 }}></div>
+                <form onSubmit={cont}>
+                    <Button autoFocus type="submit" size="large" color="accent" onClick={() => { }}>Nächste</Button>
+                </form>
+            </div>
         </div>
     );
 }
@@ -278,6 +347,7 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
 
     let currentStructure: AnatomicStructure = structures.length > 0 ? structures[currentIndex] : null!;
 
+    let [userSubmission, setUserSubmission] = useState<any>(null!);
     let [mode, setMode] = useState(ExamMode.AskImage);
 
     useEffect(() => {
@@ -382,12 +452,14 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                             case ExamMode.AskText:
                                 return <QuestionText currentStructure={currentStructure}
                                     timed={timed}
-                                    onSuccess={() => {
+                                    onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
+                                        setUserSubmission(result);
                                         setMode(ExamMode.Success);
                                     }}
-                                    onFailure={() => {
+                                    onFailure={(result: string) => {
                                         addWrong(currentStructure);
+                                        setUserSubmission(result);
                                         setMode(ExamMode.Failure);
                                     }}
                                     onTimeout={() => {
@@ -395,11 +467,11 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                         setMode(ExamMode.Timeout);
                                     }} />;
                             case ExamMode.Success:
-                                return <Correct next={askNext} />;
+                                return <Correct structure={currentStructure} next={askNext} />;
                             case ExamMode.Failure:
-                                return <Wrong next={askNext} />;
+                                return <Wrong structure={currentStructure} submission={userSubmission} next={askNext} />;
                             case ExamMode.Timeout:
-                                return <Timeout next={askNext} />;
+                                return <Timeout structure={currentStructure} next={askNext} />;
                             case ExamMode.Finished:
                                 return <Finished correct={correct} wrong={wrong} slow={slow} />;
                         }

@@ -3,6 +3,7 @@ import React from "react";
 import "./Input.scss";
 
 interface InputProps {
+    autoFocus?: boolean,
     placeholder?: string,
     type?: "text" | "password"
     style?: CSSProperties,
@@ -17,7 +18,7 @@ function Input(props: InputProps) {
         <div>
             <div className="input-container-inner" style={props.style}>
                 {props.placeholder ? <span className={"placeholder" + (accessed ? " placeholder-moved" : "")}>{props.placeholder}</span> : null}
-                <input type={type} className="input-field"
+                <input autoFocus={props.autoFocus} type={type} className="input-field"
                     onFocus={() => {
                         setAccessed(true);
                     }}

@@ -5,6 +5,7 @@ import React from "react";
 import colors from "../colors.module.scss";
 
 interface ButtonProps {
+    autoFocus?: boolean,
     inverted?: boolean,
     color?: "accent" | "primary",
     size?: "small" | "large",
@@ -17,7 +18,7 @@ interface ButtonProps {
 function Button(props: ButtonProps) {
     let { inverted = false, color = "primary", size = "small", type = "button" } = props;
     return (
-        <button type={type} className={"button-base button-" + color + (inverted ? "-inverted" : "") + " button-" + size} style={props.style} onClick={props.onClick}>
+        <button autoFocus={props.autoFocus} type={type} className={"button-base button-" + color + (inverted ? "-inverted" : "") + " button-" + size} style={props.style} onClick={props.onClick}>
             <div style={{ flexGrow: 1, color: colors[color + (inverted ? "" : "-text") + "-color"] }}>{props.children}</div>
         </button>
     );
