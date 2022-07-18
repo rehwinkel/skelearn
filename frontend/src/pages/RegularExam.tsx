@@ -54,7 +54,7 @@ function Timer({ onElapsed, timerSeconds }: { onElapsed: () => void, timerSecond
     );
 }
 
-function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailure, onTimeout }: { structures: Array<AnatomicStructure>, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: () => void, onFailure: () => void, onTimeout: () => void }) {
+function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailure, onTimeout }: { structures: Array<AnatomicStructure>, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
     let markers = structures.filter(str => str.img === currentStructure?.img).map(
         str => {
             return {
@@ -66,9 +66,9 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
                 clickable: true,
                 onClick: () => {
                     if (str.key === currentStructure?.key) {
-                        onSuccess();
+                        onSuccess(str.title);
                     } else {
-                        onFailure();
+                        onFailure(str.title);
                     }
                 },
             };
@@ -175,8 +175,12 @@ const quotes_empty = [
     "Du hast garnix eingegeben digga, eigentlich wäre es \"{correct}\", smh....."
 ];
 
-const quotes_wrong = [
+const quotes_wrong_txt = [
     "Meine Güte, das ist doch nicht \"{wrong}\", das ist \"{correct}\", smh....."
+];
+
+const quotes_wrong_img = [
+    "Meine Güte, du hast \"{wrong}\" angeklickt, das ist total falsch! Du solltest \"{correct}\" finden, smh....."
 ];
 
 const quotes_slow = [
@@ -209,13 +213,13 @@ function Correct({ next, structure }: { next: (e: any) => void, structure: Anato
     );
 }
 
-function Wrong({ next, structure, submission }: { next: (e: any) => void, structure: AnatomicStructure, submission: any }) {
+function Wrong({ next, structure, submission, mode }: { next: (e: any) => void, structure: AnatomicStructure, submission: any, mode: ExamMode }) {
     const select = (list: any) => {
         let i = Math.round(Math.random() * (list.length - 1));
         return list[i];
     }
 
-    let text = select(submission ? quotes_wrong : quotes_empty);
+    let text = select(submission ? (mode === ExamMode.FailureImage ? quotes_wrong_img : quotes_wrong_txt) : quotes_empty);
 
     function cont(e: any) {
         e.preventDefault();
@@ -331,7 +335,8 @@ function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>,
 enum ExamMode {
     AskImage,
     AskText,
-    Failure,
+    FailureText,
+    FailureImage,
     Success,
     Timeout,
     Finished,
@@ -469,13 +474,15 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                 return <QuestionImage structures={structures}
                                     currentStructure={currentStructure}
                                     timed={timed}
-                                    onSuccess={() => {
+                                    onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
+                                        setUserSubmission(result);
                                         setMode(ExamMode.Success);
                                     }}
-                                    onFailure={() => {
+                                    onFailure={(result: string) => {
                                         addWrong(currentStructure);
-                                        setMode(ExamMode.Failure);
+                                        setUserSubmission(result);
+                                        setMode(ExamMode.FailureImage);
                                     }}
                                     onTimeout={() => {
                                         addSlow(currentStructure);
@@ -492,7 +499,7 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                     onFailure={(result: string) => {
                                         addWrong(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.Failure);
+                                        setMode(ExamMode.FailureText);
                                     }}
                                     onTimeout={() => {
                                         addSlow(currentStructure);
@@ -500,8 +507,9 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                     }} />;
                             case ExamMode.Success:
                                 return <Correct structure={currentStructure} next={askNext} />;
-                            case ExamMode.Failure:
-                                return <Wrong structure={currentStructure} submission={userSubmission} next={askNext} />;
+                            case ExamMode.FailureText:
+                            case ExamMode.FailureImage:
+                                return <Wrong mode={mode} structure={currentStructure} submission={userSubmission} next={askNext} />;
                             case ExamMode.Timeout:
                                 return <Timeout structure={currentStructure} next={askNext} />;
                             case ExamMode.Finished:
