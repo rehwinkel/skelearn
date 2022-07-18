@@ -61,7 +61,7 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
                 centerX: str.centerX,
                 centerY: str.centerY,
                 radius: str.selectionRadius,
-                markerWidth: 3,
+                markerWidth: str.selectionRadius * 0.05,
                 markerColor: colors["accent-color"],
                 clickable: true,
                 onClick: () => {
