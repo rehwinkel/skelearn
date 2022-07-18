@@ -13,7 +13,6 @@ import Dashboard from './pages/Dashboard';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
 import Learn from './pages/Learn';
 import RegularExam from './pages/RegularExam';
-import RealExam from './pages/RealExam';
 import Impressum from './pages/Impressum';
 
 function HomeOrLogin() {
@@ -67,7 +66,7 @@ function App() {
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <RegularExam timed={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RegularExam timed={false} isReal={false} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}
@@ -76,7 +75,7 @@ function App() {
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <RealExam timed={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RegularExam timed={true} isReal={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}

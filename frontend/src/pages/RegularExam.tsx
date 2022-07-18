@@ -110,8 +110,6 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
     let [showHint, setShowHint] = useState(false);
     let [submission, setSubmission] = useState("");
 
-    console.log(currentStructure);
-
     return (
         <div className="learn-container">
             <div style={{ height: "max(300px, calc(100vh - 370px))", flexGrow: 2 }}>
@@ -136,7 +134,8 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
                         <span className="exam-prompt">Was ist der Name des angezeigten Knochens?</span>
-                        <form onSubmit={() => {
+                        <form onSubmit={(e: any) => {
+                            e.preventDefault();
                             if (testUserSubmission(currentStructure!, submission)) {
                                 onSuccess(submission);
                             } else {
@@ -239,6 +238,18 @@ function Wrong({ next, structure, submission, mode }: { next: (e: any) => void, 
     );
 }
 
+function Intermission({ next }: { next: (e: any) => void }) {
+    useEffect(() => {
+        setTimeout(next, 1500);
+    });
+
+    return (
+        <div>
+            <span style={{ fontSize: "28px" }}>Nächste frage kommt gleich...</span>
+        </div>
+    );
+}
+
 function Timeout({ next, structure }: { next: (e: any) => void, structure: AnatomicStructure }) {
     const select = (list: any) => {
         let i = Math.round(Math.random() * (list.length - 1));
@@ -285,7 +296,7 @@ function ResultItem({ first, last, status, children }: { first: boolean, last: b
     );
 }
 
-function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure> }) {
+function Finished({ correct, wrong, slow, isReal }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure>, isReal: boolean }) {
     let auth = useAuth();
     let correctPercentage = Math.floor(100.0 * (correct.length / (correct.length + wrong.length + slow.length)));
     let correctWithStatus = correct.map(e => { (e as any).status = "correct"; return e; });
@@ -302,7 +313,9 @@ function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>,
             }
             await apiSubmitResult(result, auth.session.token);
         };
-        upload();
+        if (!isReal) {
+            upload();
+        }
     }, [correct, wrong, slow]);
 
     return (
@@ -340,6 +353,7 @@ enum ExamMode {
     Success,
     Timeout,
     Finished,
+    Intermission,
 }
 
 function getNextMode(textMode: boolean, imageMode: boolean, supportedModes: Array<"img" | "text">): ExamMode {
@@ -364,7 +378,7 @@ interface Category {
     elements: Array<string>,
 }
 
-function RegularExam({ textMode, imageMode, timed, category }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean }) {
+function RegularExam({ textMode, imageMode, timed, category, isReal }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean, isReal: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
     let [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -475,7 +489,7 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
     return (
         <Card style={{ width: "60%" }} loading={structures.length === 0}>
             <div style={{ textAlign: "center" }}>
-                <span className="card-title">Reguläre Abfrage</span>
+                <span className="card-title">{isReal ? "Prüfung" : "Reguläre Abfrage"}</span>
             </div>
             <div>
                 {
@@ -488,16 +502,28 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                     onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.Success);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Success);
+                                        }
                                     }}
                                     onFailure={(result: string) => {
                                         addWrong(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.FailureImage);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.FailureImage);
+                                        }
                                     }}
                                     onTimeout={() => {
                                         addSlow(currentStructure);
-                                        setMode(ExamMode.Timeout);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Timeout);
+                                        }
                                     }} />;
                             case ExamMode.AskText:
                                 return <QuestionText currentStructure={currentStructure}
@@ -505,16 +531,28 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                     onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.Success);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Success);
+                                        }
                                     }}
                                     onFailure={(result: string) => {
                                         addWrong(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.FailureText);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.FailureText);
+                                        }
                                     }}
                                     onTimeout={() => {
                                         addSlow(currentStructure);
-                                        setMode(ExamMode.Timeout);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Timeout);
+                                        }
                                     }} />;
                             case ExamMode.Success:
                                 return <Correct structure={currentStructure} next={askNext} />;
@@ -524,7 +562,9 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                             case ExamMode.Timeout:
                                 return <Timeout structure={currentStructure} next={askNext} />;
                             case ExamMode.Finished:
-                                return <Finished correct={correct} wrong={wrong} slow={slow} />;
+                                return <Finished correct={correct} wrong={wrong} slow={slow} isReal={isReal} />;
+                            case ExamMode.Intermission:
+                                return <Intermission next={askNext} />;
                         }
                     })()
                 }
