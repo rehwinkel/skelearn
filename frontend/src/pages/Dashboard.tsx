@@ -68,7 +68,7 @@ function Dashboard() {
             let resp = await apiGetAnatomy();
             if (resp.ok) {
                 let anatomy = await resp.json();
-                setStructures(anatomy);
+                setStructures(!!anatomy ? anatomy : []);
             }
         };
         getInfo();
