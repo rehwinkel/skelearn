@@ -54,7 +54,7 @@ function Timer({ onElapsed, timerSeconds }: { onElapsed: () => void, timerSecond
     );
 }
 
-function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailure, onTimeout }: { structures: Array<AnatomicStructure>, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
+function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailure, onTimeout, isReal }: { isReal: boolean, structures: Array<AnatomicStructure>, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
     let markers = structures.filter(str => str.img === currentStructure?.img).map(
         str => {
             return {
@@ -88,10 +88,14 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
                         <span className="exam-prompt">Klicke auf den: <br /> <b>{currentStructure?.title}</b></span>
-                        <div className="exam-hint-container">
-                            <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
-                            {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
-                        </div>
+                        {
+                            !isReal ?
+                                <div className="exam-hint-container">
+                                    <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
+                                    {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
+                                </div>
+                                : null
+                        }
                     </div>
                 </div>
                 <div className="learn-button-spacer"></div>
@@ -106,7 +110,7 @@ function testUserSubmission(structure: AnatomicStructure, name: string): boolean
     return structure.title.toLowerCase() === name.toLowerCase();
 }
 
-function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout }: { currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
+function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout, isReal }: { isReal: boolean, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
     let [showHint, setShowHint] = useState(false);
     let [submission, setSubmission] = useState("");
 
@@ -147,10 +151,14 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
                                 <Button type="submit" onClick={() => { }}>Absenden</Button>
                             </div>
                         </form>
-                        <div className="exam-hint-container">
-                            <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
-                            {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
-                        </div>
+                        {
+                            !isReal ?
+                                <div className="exam-hint-container">
+                                    <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
+                                    {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
+                                </div>
+                                : null
+                        }
                     </div>
                 </div>
                 <div className="learn-button-spacer"></div>
@@ -499,6 +507,7 @@ function RegularExam({ textMode, imageMode, timed, category, isReal }: { categor
                                 return <QuestionImage structures={structures}
                                     currentStructure={currentStructure}
                                     timed={timed}
+                                    isReal={isReal}
                                     onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
                                         setUserSubmission(result);
@@ -528,6 +537,7 @@ function RegularExam({ textMode, imageMode, timed, category, isReal }: { categor
                             case ExamMode.AskText:
                                 return <QuestionText currentStructure={currentStructure}
                                     timed={timed}
+                                    isReal={isReal}
                                     onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
                                         setUserSubmission(result);
