@@ -358,6 +358,12 @@ function getNextMode(textMode: boolean, imageMode: boolean, supportedModes: Arra
     }
 }
 
+interface Category {
+    name: string,
+    key: string,
+    elements: Array<string>,
+}
+
 function RegularExam({ textMode, imageMode, timed, category }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
     let [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -381,7 +387,12 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
             if (resp.ok) {
                 rawData = await resp.json();
             }
-            let categories = await apiGetCategories();
+            let categories: Array<Category>;
+            let resp2 = await apiGetCategories();
+            if (resp2.ok) {
+                let data = await resp2.json();
+                categories = data;
+            }
             let foundCategory = categories.find(c => c.key === category)!;
 
             let half_secs = Math.round(Date.now() / 2000);

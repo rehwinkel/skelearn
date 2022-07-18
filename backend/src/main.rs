@@ -163,6 +163,13 @@ struct AnatomicStructure {
     tip: String,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Category {
+    name: String,
+    key: String,
+    elements: Vec<String>,
+}
+
 impl Session {
     fn new_random() -> Self {
         let timestamp = SystemTime::now();
@@ -472,8 +479,13 @@ async fn anatomy_handler(data: Data<AppData>) -> HttpResponse {
     HttpResponse::Ok().body(serde_json::to_string(&data.data).unwrap())
 }
 
+async fn categories_handler(data: Data<AppData>) -> HttpResponse {
+    HttpResponse::Ok().body(serde_json::to_string(&data.categories).unwrap())
+}
+
 struct AppData {
     db: Database,
+    categories: Vec<Category>,
     data: Vec<AnatomicStructure>,
 }
 
@@ -481,13 +493,19 @@ struct AppData {
 async fn main() -> eyre::Result<()> {
     let data_json = include_str!("data.json");
     let data: Vec<AnatomicStructure> = serde_json::from_str(data_json)?;
+    let categories_json = include_str!("categories.json");
+    let categories: Vec<Category> = serde_json::from_str(categories_json)?;
 
     let url = std::env::var("MONGO_URL").unwrap_or(String::from("mongodb://127.0.0.1:27017"));
     println!("Server started at '{}'!", url);
     let client_opts = ClientOptions::parse(url).await?;
     let client = Client::with_options(client_opts)?;
     let db = client.database("skelearn");
-    let db_data = Data::new(AppData { db, data });
+    let db_data = Data::new(AppData {
+        db,
+        categories,
+        data,
+    });
 
     HttpServer::new(move || {
         App::new()
@@ -501,6 +519,7 @@ async fn main() -> eyre::Result<()> {
                     .route("/submitResult", web::post().to(submit_result_handler))
                     .route("/resetResults", web::post().to(reset_results_handler))
                     .route("/results", web::post().to(results_handler))
+                    .route("/categories", web::get().to(categories_handler))
                     .route("/anatomy", web::get().to(anatomy_handler)),
             )
     })

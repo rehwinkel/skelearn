@@ -115,36 +115,15 @@ async function apiGetAnatomy(): Promise<Response | null> {
     }
 }
 
-interface Category {
-    name: string,
-    key: string,
-    elements: Array<string>,
-}
-
-async function apiGetCategories(): Promise<Array<Category>> {
-    return [
-        {
-            name: "Alle Knochen",
-            key: "all",
-            elements: [
-                "vertebrae_cervicales", "sternum", "os_cuboideum", "os_cuneiforme_laterale",
-                "os_hamatum", "viscerocranium", "columna_vertebralis", "os_sacrum", "fibula",
-                "stapes", "ulna", "calcaneus", "partella", "os_lacrimale", "os_femoris",
-                "os_ilium", "axis", "humerus", "os_scaphoideum", "scapula", "maxilla",
-                "os_nasale", "os_occipitale", "talus", "os_lunatum", "os_trapezoideum",
-                "vomer", "vertebrae_lumbales", "radius", "os_zygomatikum", "incus", "atlas",
-                "neurocranium", "os_parietale", "ossa_metacarpi", "digitus_phalanx_distalis",
-                "mandibular", "costae", "cranium", "os_pubis", "os_ischii", "digitus_phalanx_media",
-                "os_trapezium", "os_ethmoidale", "digitus_pedis_phalanx_distalis", "malleus",
-                "os_pisiforme", "digitus_phalanx_proximalis", "os_cuneiforme_mediale",
-                "tibia", "os_hyoideum", "os_coccygi", "digitus_pedis_phalanx_media",
-                "os_frontale", "os_temporale", "cingulum_membri_superioris", "os_triquetrum",
-                "os_coxae", "os_sphenoidale", "os_capitatum", "vertebrae_thoracice",
-                "os_naviculare", "digitus_pedis_phalanx_proximalis", "os_cuneiforme_intermedium",
-                "clavicula", "carpus", "ossa_metatarsi"
-            ]
-        }
-    ];
+async function apiGetCategories(): Promise<Response | null> {
+    let response: Response;
+    try {
+        response = await get("/categories", {});
+        return response;
+    } catch (err: any) {
+        console.error(err);
+        return null;
+    }
 }
 
 export {

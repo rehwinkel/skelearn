@@ -58,7 +58,13 @@ function Dashboard() {
 
     useEffect(() => {
         let getInfo = async () => {
-            setCategories(await apiGetCategories());
+            let resp = await apiGetCategories();
+            if (resp.ok) {
+                let data = await resp.json();
+                setCategories(data);
+            } else {
+                setCategories([]);
+            }
         };
         getInfo();
     }, [setCategories]);
