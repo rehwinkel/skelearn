@@ -10,7 +10,7 @@ function Home() {
     return (
         <div className="home-area">
             <div className="title-area">
-                <span className="title">Ske<span style={{ color: colors["accent-color"] }}>learn</span></span>
+                <span className="title">Ske<span style={{ color: colors["primary-color"] }}>learn</span></span>
             </div>
             <div className="content-area">
                 <span className="slogan">Learn bones - become a boner.</span>

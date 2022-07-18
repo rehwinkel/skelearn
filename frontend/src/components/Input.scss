@@ -9,9 +9,9 @@
 
 .input-field {
     border: 1px solid darken($primary-text-color, 20%);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 16px 12px;
-    font-size: 16px;
+    font-size: 17px;
     font-family: inherit;
     flex-grow: 1;
     display: block;
@@ -27,7 +27,7 @@
 }
 
 .placeholder {
-    font-size: 16px;
+    font-size: 17px;
     position: absolute;
     left: 13px;
     top: 17px;

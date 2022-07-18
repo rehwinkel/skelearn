@@ -7,8 +7,8 @@
     "name": "Ian Rehwinkel"
   },
   "scripts": {
-    "dev": "yarn run webpack serve --mode='development'",
-    "build": "yarn run webpack build --mode='production'"
+    "dev": "yarn run webpack serve --mode=development",
+    "build": "yarn run webpack build --mode=production"
   },
   "devDependencies": {
     "@babel/core": "^7.18.6",
