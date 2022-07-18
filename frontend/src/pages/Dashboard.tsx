@@ -131,7 +131,7 @@ function Dashboard() {
                                             first={i === 0}
                                             last={i === structures.length - 1}
                                             progress={entry[1] as number}>
-                                            {structures.find(str => str.key === entry[0]).name}
+                                            {structures.find(str => str.key === entry[0])?.name}
                                         </ResultItem>);
                                     return elems;
                                 })()
