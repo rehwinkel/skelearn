@@ -7,6 +7,7 @@ import Card from "../components/Card";
 import Input from "../components/Input";
 import "./Register.scss";
 import React from "react";
+import { AuthResult, useAuth } from "../auth";
 
 function Register() {
     let [_, setLocation] = useLocation();
@@ -15,6 +16,7 @@ function Register() {
     let [password, setPassword] = useState("");
     let [passwordRepeat, setPasswordRepeat] = useState("");
     let [error, setError] = useState<string | null>(null);
+    let auth = useAuth();
 
     async function register(e: any) {
         e.preventDefault(); // to avoid page reload
@@ -32,7 +34,11 @@ function Register() {
         if (!response) {
             setError("Keine Verbindung!");
         } else if (response.ok) {
-            setLocation("/login");
+            if (AuthResult.Ok === await auth.signIn(username, password)) {
+                setLocation("/dashboard");
+            } else {
+                setError("Ein unerwarteter Fehler ist aufgetreten!");
+            }
         } else {
             setError("Nutzername bereits vergeben!");
         }

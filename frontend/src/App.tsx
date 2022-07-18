@@ -1,7 +1,7 @@
 import './App.scss';
 import logo from "./logo.svg";
 
-import { mdiAccount, mdiHome } from '@mdi/js'
+import { mdiAccount, mdiHome, mdiLogout } from '@mdi/js'
 import IconButton from './components/IconButton';
 
 import Home from './pages/Home';
@@ -23,9 +23,16 @@ function HomeOrLogin() {
     let isHome = !!auth.session.token;
 
     return (
-        <Link to={isHome ? "/dashboard" : "/login"}>
-            <IconButton inverted={true} color="primary" size="small" icon={isHome ? mdiHome : mdiAccount} onClick={() => { }}></IconButton>
-        </Link>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+            <div style={{ marginRight: "8px" }}>
+                {isHome ? <IconButton inverted={true} color="primary" size="small" icon={mdiLogout} onClick={async () => {
+                    await auth.signOut();
+                }}></IconButton> : null}
+            </div>
+            <Link to={isHome ? "/dashboard" : "/login"}>
+                <IconButton inverted={true} color="primary" size="small" icon={isHome ? mdiHome : mdiAccount} onClick={() => { }}></IconButton>
+            </Link>
+        </div>
     );
 }
 

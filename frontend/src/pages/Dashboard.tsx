@@ -128,8 +128,19 @@ function Dashboard() {
                 </div>
                 <span className="dashboard-section-title">Kategorien</span>
                 <div className="dashboard-categories">
-                    <Select options={categories.map(c => { return { key: c.key, name: c.name + " (" + c.elements.length + ")" }; })} onSelected={(e) => { setCategory(e.target.value); }}></Select>
-                    <Link to="/categories"><IconButton icon={mdiPencil} onClick={() => { }}></IconButton></Link>
+                    <Select options={
+                        categories.map(c => {
+                            return { key: c.key, name: c.name + " (" + c.elements.length + ")" };
+                        }).concat([{ key: "create_new", name: "Neue Kategorie erstellen..." }])
+                    }
+                        onSelected={
+                            (e) => {
+                                if (e.target.value === "create_new") {
+                                    setLocation("/categories", { replace: true });
+                                }
+                                setCategory(e.target.value);
+                            }
+                        }></Select>
                 </div>
                 {!category ?
                     <div style={{ marginTop: "8px" }}>
