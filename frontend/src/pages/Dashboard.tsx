@@ -143,13 +143,15 @@ function Dashboard() {
                     <Select options={
                         categories.map(c => {
                             return { key: c.key, name: c.name + " (" + c.elements.length + ")" };
-                        }).concat([{ key: "create_new", name: "Neue Kategorie erstellen..." }])
+                        }) //.concat([{ key: "create_new", name: "Neue Kategorie erstellen..." }])
                     }
                         onSelected={
                             (e) => {
+                                /*
                                 if (e.target.value === "create_new") {
                                     setLocation("/categories", { replace: true });
                                 }
+                                */
                                 setCategory(e.target.value);
                             }
                         }></Select>

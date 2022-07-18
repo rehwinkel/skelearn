@@ -15,7 +15,6 @@ import Learn from './pages/Learn';
 import RegularExam from './pages/RegularExam';
 import RealExam from './pages/RealExam';
 import Impressum from './pages/Impressum';
-import Categories from './pages/Categories';
 
 function HomeOrLogin() {
     let auth = useAuth();
@@ -56,7 +55,6 @@ function App() {
                         <Route path="/login" ><Login /></Route>
                         <Route path="/register" ><Register /></Route>
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
-                        <Route path="/categories" ><RequireAuth fallback={<Redirect to="/login" />}><Categories /></RequireAuth></Route>
                         <Route path="/learn/:category" >
                             {(params) => {
                                 return (
