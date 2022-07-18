@@ -175,23 +175,39 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
 }
 
 const quotes_correct = [
-    "Omg du bist der geilste, Bruder! Du hast voll recht mit \"{correct}\"!!!"
+    "Omg du bist der geilste, Bruder! Du hast voll recht mit \"{correct}\"!!!",
+    "Digga bist du gut, \"{correct}\" ist richtig!!!",
+    "\"{correct}\" is korrekt, du Genie!!!",
+    "Ding, Ding, Ding, \"{correct}\" ist die richtige Antwort!!!"
 ];
+
 
 const quotes_empty = [
-    "Du hast garnix eingegeben digga, eigentlich wäre es \"{correct}\", smh....."
+    "Du hast garnix eingegeben digga, eigentlich wäre es \"{correct}\", smh.....",
+    "Falls du die richtige Antwort suchst, die war \"{correct}\".....",
+    "Von nix kommt nix, \"{correct}\" wäre die richtige Antwort",
+    "Du hast leider nichts eingegeben, \"{correct}\" wäre richtig gewesen"
 ];
+
 
 const quotes_wrong_txt = [
-    "Meine Güte, das ist doch nicht \"{wrong}\", das ist \"{correct}\", smh....."
+    "Meine Güte, das ist doch nicht \"{wrong}\", das ist \"{correct}\", smh.....",
+    "Nein Junge nicht \"{wrong}\", das ist \"{correct}\".",
+    "\"{wrong}\" ist leider nicht korrekt, \"{correct}\" wäre richtig gewesen."
 ];
+
 
 const quotes_wrong_img = [
-    "Meine Güte, du hast \"{wrong}\" angeklickt, das ist total falsch! Du solltest \"{correct}\" finden, smh....."
+    "Meine Güte, du hast \"{wrong}\" angeklickt, das ist total falsch! Du solltest \"{correct}\" finden, smh.....",
+    "Das ist doch nicht \"{correct}\", du hast \"{wrong}\" angeklickt Mensch.",
+    "Das war leider \"{wrong}\", und nicht \"{correct}\"."
 ];
 
+
 const quotes_slow = [
-    "Das war ja eigentlich der \"{correct}\", aber du hast ja noch gewartet dass die Schnecke die Straße überquert."
+    "Das war ja eigentlich der \"{correct}\", aber du hast ja noch gewartet dass die Schnecke die Straße überquert.",
+    "Zu langsam! \"{correct}\" wäre es gewesen.",
+    "\"{correct}\" wäre richtig gewesen, aber das ging dir wohl zu schnell."
 ];
 
 function Correct({ next, structure }: { next: (e: any) => void, structure: AnatomicStructure }) {
