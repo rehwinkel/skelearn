@@ -294,6 +294,22 @@ async fn submit_result(db: &Database, submission: &ResultSubmission) -> eyre::Re
     }
 }
 
+async fn reset_results(db: &Database, token: &String) -> eyre::Result<bool> {
+    let users: Collection<User> = db.collection("users");
+    if let Some(user) = check_token(db, token).await? {
+        users
+            .update_one(
+                doc! { "username": &user.username },
+                doc! { "$set": { "results": [] } },
+                None,
+            )
+            .await?;
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct ResultSummary {
     total_score: f64,
@@ -425,6 +441,22 @@ async fn submit_result_handler(
     }
 }
 
+async fn reset_results_handler(data: Data<AppData>, token: String) -> HttpResponse {
+    match reset_results(&data.db, &token).await {
+        Ok(result) => {
+            if result {
+                HttpResponse::Ok().finish()
+            } else {
+                HttpResponse::Unauthorized().finish()
+            }
+        }
+        Err(e) => {
+            eprintln!("Error while handling submit results: {:?}", e);
+            HttpResponse::InternalServerError().body("Internal Server Error")
+        }
+    }
+}
+
 async fn results_handler(data: Data<AppData>, token: String) -> HttpResponse {
     match get_results(&data.db, &token).await {
         Ok(Some(result)) => HttpResponse::Ok().body(serde_json::to_string(&result).unwrap()),
@@ -467,6 +499,7 @@ async fn main() -> eyre::Result<()> {
                     .route("/register", web::post().to(register_handler))
                     .route("/token", web::post().to(check_token_handler))
                     .route("/submitResult", web::post().to(submit_result_handler))
+                    .route("/resetResults", web::post().to(reset_results_handler))
                     .route("/results", web::post().to(results_handler))
                     .route("/anatomy", web::get().to(anatomy_handler)),
             )

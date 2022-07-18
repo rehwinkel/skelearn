@@ -80,6 +80,17 @@ async function apiGetResults(token: string): Promise<Response | null> {
     }
 }
 
+async function apiResetResults(token: string): Promise<Response | null> {
+    let response: Response;
+    try {
+        response = await post("/resetResults", {}, token);
+        return response;
+    } catch (err: any) {
+        console.error(err);
+        return null;
+    }
+}
+
 interface AnatomyElement {
     name: string,
     key: string,
@@ -142,6 +153,7 @@ export {
     apiCheckToken,
     apiSubmitResult,
     apiGetResults,
+    apiResetResults,
     apiGetAnatomy,
     apiGetCategories
 };
