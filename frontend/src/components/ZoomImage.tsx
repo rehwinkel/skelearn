@@ -183,9 +183,9 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
                         if (imageWidth) {
                             let markerWidth = marker.markerWidth * userScale;
                             let markerDiameter = marker.radius * 2;
-                            let markerSize = (userScale * scale * containerWidth - markerWidth * 2) * markerDiameter / imageWidth;
-                            let markerPosX = (xOffset || 0) + (inImage(marker.centerX - marker.radius) || 0);
-                            let markerPosY = (yOffset || 0) + (inImage(marker.centerY - marker.radius) || 0);
+                            let markerSize = (userScale * scale * containerWidth) * markerDiameter / imageWidth;
+                            let markerPosX = (xOffset || 0) + (inImage(marker.centerX - marker.radius) || 0) - markerWidth;
+                            let markerPosY = (yOffset || 0) + (inImage(marker.centerY - marker.radius) || 0) - markerWidth;
                             return (<div className="marker"
                                 key={marker.centerX + "_" + marker.centerY}
                                 onClick={e => {
@@ -215,14 +215,14 @@ const ZoomImage = forwardRef(({ src, position, pMarkers }: { src: any, pMarkers?
                                     ));
                                 }}
                                 style={{
-                                    backgroundColor: colorAlpha(marker.markerColor, marker.hovered ? 0.4 : 0.2),
+                                    background: "radial-gradient(circle, " + marker.markerColor + " 0%, " + colorAlpha(marker.markerColor, marker.hovered ? 0.4 : 0.2) + " 20%, " + colorAlpha(marker.markerColor, marker.hovered ? 0.4 : 0.2) + " 100%)",
                                     left: markerPosX,
                                     top: markerPosY,
                                     width: markerSize,
                                     height: markerSize,
                                     borderWidth: markerWidth,
                                     borderColor: marker.markerColor
-                                }} />);
+                                }}></div>);
                         } else {
                             return null;
                         }

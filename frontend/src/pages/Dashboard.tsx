@@ -2,14 +2,14 @@ import "./Dashboard.scss";
 import Card from "../components/Card";
 import Select from "../components/Select";
 import IconButton from "../components/IconButton";
-import { mdiPencil, mdiTrashCanOutline } from "@mdi/js";
+import { mdiTrashCanOutline } from "@mdi/js";
 import Button from "../components/Button";
 import { ReactNode, useEffect, useState } from "react";
 import Check from "../components/Check";
 import ProgressBar from "../components/ProgressBar";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import Alert from "../components/Alert";
-import { apiGetAnatomy, apiGetCategories, apiGetResults } from "../api";
+import { apiGetAnatomy, apiGetCategories, apiGetResults, apiResetResults } from "../api";
 import { useAuth } from "../auth";
 import React from "react";
 
@@ -58,7 +58,13 @@ function Dashboard() {
 
     useEffect(() => {
         let getInfo = async () => {
-            setCategories(await apiGetCategories());
+            let resp = await apiGetCategories();
+            if (resp.ok) {
+                let data = await resp.json();
+                setCategories(data);
+            } else {
+                setCategories([]);
+            }
         };
         getInfo();
     }, [setCategories]);
@@ -68,7 +74,7 @@ function Dashboard() {
             let resp = await apiGetAnatomy();
             if (resp.ok) {
                 let anatomy = await resp.json();
-                setStructures(anatomy);
+                setStructures(!!anatomy ? anatomy : []);
             }
         };
         getInfo();
@@ -98,7 +104,19 @@ function Dashboard() {
                         <div className="learn-progress-heading">
                             <span>Im Schnitt hast du {Math.floor(results.total_score * 100)}% der Fragen richtig beantwortet.</span>
                             <div style={{ flexGrow: 1 }}></div>
-                            <IconButton style={{ flexShrink: 0 }} onClick={() => { /* TODO */ }} icon={mdiTrashCanOutline}></IconButton>
+                            <IconButton style={{ flexShrink: 0 }} onClick={() => {
+                                let result = confirm("Wenn du jetzt bestätigst wird dein gesamter Fortschritt zurückgesetzt. Bist du dir sicher?");
+                                const deleteProgress = async () => {
+                                    let resp = await apiResetResults(auth.session.token);
+                                    // TODO: handle errors properly
+                                    setResults(null);
+                                    setLoadingResults(false);
+                                };
+                                if (result) {
+                                    setLoadingResults(true);
+                                    deleteProgress();
+                                }
+                            }} icon={mdiTrashCanOutline}></IconButton>
                         </div>
                         <span className="dashboard-section-title">Allgemeine Erfolgsquote ({Math.floor(results.total_score * 100)}%)</span>
                         <ProgressBar progress={results.total_score}></ProgressBar>
@@ -113,7 +131,7 @@ function Dashboard() {
                                             first={i === 0}
                                             last={i === structures.length - 1}
                                             progress={entry[1] as number}>
-                                            {structures.find(str => str.key === entry[0]).name}
+                                            {structures.find(str => str.key === entry[0])?.name}
                                         </ResultItem>);
                                     return elems;
                                 })()
@@ -121,15 +139,28 @@ function Dashboard() {
                         </div>
                     </div>
                 }
-            </Card>
+            </Card >
             <Card loading={false}>
                 <div style={{ textAlign: "center" }}>
                     <span className="card-title">Lernen</span>
                 </div>
                 <span className="dashboard-section-title">Kategorien</span>
                 <div className="dashboard-categories">
-                    <Select options={categories.map(c => { return { key: c.key, name: c.name + " (" + c.elements.length + ")" }; })} onSelected={(e) => { setCategory(e.target.value); }}></Select>
-                    <Link to="/categories"><IconButton icon={mdiPencil} onClick={() => { }}></IconButton></Link>
+                    <Select options={
+                        categories.map(c => {
+                            return { key: c.key, name: c.name + " (" + c.elements.length + ")" };
+                        }) //.concat([{ key: "create_new", name: "Neue Kategorie erstellen..." }])
+                    }
+                        onSelected={
+                            (e) => {
+                                /*
+                                if (e.target.value === "create_new") {
+                                    setLocation("/categories", { replace: true });
+                                }
+                                */
+                                setCategory(e.target.value);
+                            }
+                        }></Select>
                 </div>
                 {!category ?
                     <div style={{ marginTop: "8px" }}>
@@ -161,7 +192,7 @@ function Dashboard() {
                     setLocation(path);
                 }}>Jetzt abfragen</Button>
             </Card>
-        </div>
+        </div >
     );
 }
 

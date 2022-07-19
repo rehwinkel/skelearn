@@ -1,7 +1,7 @@
 import './App.scss';
 import logo from "./logo.svg";
 
-import { mdiAccount, mdiHome } from '@mdi/js'
+import { mdiAccount, mdiHome, mdiLogout } from '@mdi/js'
 import IconButton from './components/IconButton';
 
 import Home from './pages/Home';
@@ -13,9 +13,7 @@ import Dashboard from './pages/Dashboard';
 import { AuthProvider, RequireAuth, useAuth } from './auth';
 import Learn from './pages/Learn';
 import RegularExam from './pages/RegularExam';
-import RealExam from './pages/RealExam';
 import Impressum from './pages/Impressum';
-import Categories from './pages/Categories';
 
 function HomeOrLogin() {
     let auth = useAuth();
@@ -23,9 +21,16 @@ function HomeOrLogin() {
     let isHome = !!auth.session.token;
 
     return (
-        <Link to={isHome ? "/dashboard" : "/login"}>
-            <IconButton inverted={true} color="primary" size="small" icon={isHome ? mdiHome : mdiAccount} onClick={() => { }}></IconButton>
-        </Link>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+            <div style={{ marginRight: "8px" }}>
+                {isHome ? <IconButton inverted={true} color="primary" size="small" icon={mdiLogout} onClick={async () => {
+                    await auth.signOut();
+                }}></IconButton> : null}
+            </div>
+            <Link to={isHome ? "/dashboard" : "/login"}>
+                <IconButton inverted={true} color="primary" size="small" icon={isHome ? mdiHome : mdiAccount} onClick={() => { }}></IconButton>
+            </Link>
+        </div>
     );
 }
 
@@ -49,7 +54,6 @@ function App() {
                         <Route path="/login" ><Login /></Route>
                         <Route path="/register" ><Register /></Route>
                         <Route path="/dashboard" ><RequireAuth fallback={<Redirect to="/login" />}><Dashboard /></RequireAuth></Route>
-                        <Route path="/categories" ><RequireAuth fallback={<Redirect to="/login" />}><Categories /></RequireAuth></Route>
                         <Route path="/learn/:category" >
                             {(params) => {
                                 return (
@@ -62,7 +66,7 @@ function App() {
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <RegularExam timed={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RegularExam timed={false} isReal={false} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}
@@ -71,7 +75,7 @@ function App() {
                             {(params) => {
                                 return (
                                     <RequireAuth fallback={<Redirect to="/login" />}>
-                                        <RealExam timed={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
+                                        <RegularExam timed={true} isReal={true} category={params.category} textMode={params.txt === "yestxt"} imageMode={params.img === "yesimg"} />
                                     </RequireAuth>
                                 );
                             }}

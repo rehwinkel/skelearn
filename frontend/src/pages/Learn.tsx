@@ -17,6 +17,12 @@ interface AnatomicStructure {
     img: any,
 }
 
+interface Category {
+    name: string,
+    key: string,
+    elements: Array<string>,
+}
+
 function Learn({ category }: { category: string }) {
     let [currentIndex, setCurrentIndex] = useState<number>(0);
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
@@ -28,7 +34,12 @@ function Learn({ category }: { category: string }) {
             if (resp.ok) {
                 rawData = await resp.json();
             }
-            let categories = await apiGetCategories();
+            let categories: Array<Category>;
+            let resp2 = await apiGetCategories();
+            if (resp2.ok) {
+                let data = await resp2.json();
+                categories = data;
+            }
             let foundCategory = categories.find(c => c.key === category)!;
 
             setStructures(rawData.filter((elem: any) => foundCategory.elements.includes(elem.key)).map(

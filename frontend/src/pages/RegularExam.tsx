@@ -14,6 +14,7 @@ import Icon from "@mdi/react";
 import IconButton from "../components/IconButton";
 import Input from "../components/Input";
 import { useAuth } from "../auth";
+import seedrandom from "seedrandom";
 
 interface AnatomicStructure {
     centerX: number,
@@ -53,21 +54,21 @@ function Timer({ onElapsed, timerSeconds }: { onElapsed: () => void, timerSecond
     );
 }
 
-function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailure, onTimeout }: { structures: Array<AnatomicStructure>, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: () => void, onFailure: () => void, onTimeout: () => void }) {
+function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailure, onTimeout, isReal }: { isReal: boolean, structures: Array<AnatomicStructure>, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
     let markers = structures.filter(str => str.img === currentStructure?.img).map(
         str => {
             return {
                 centerX: str.centerX,
                 centerY: str.centerY,
                 radius: str.selectionRadius,
-                markerWidth: 3,
+                markerWidth: str.selectionRadius * 0.05,
                 markerColor: colors["accent-color"],
                 clickable: true,
                 onClick: () => {
                     if (str.key === currentStructure?.key) {
-                        onSuccess();
+                        onSuccess(str.title);
                     } else {
-                        onFailure();
+                        onFailure(str.title);
                     }
                 },
             };
@@ -87,10 +88,14 @@ function QuestionImage({ structures, currentStructure, timed, onSuccess, onFailu
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
                         <span className="exam-prompt">Klicke auf den: <br /> <b>{currentStructure?.title}</b></span>
-                        <div className="exam-hint-container">
-                            <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
-                            {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
-                        </div>
+                        {
+                            !isReal ?
+                                <div className="exam-hint-container">
+                                    <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
+                                    {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
+                                </div>
+                                : null
+                        }
                     </div>
                 </div>
                 <div className="learn-button-spacer"></div>
@@ -105,7 +110,7 @@ function testUserSubmission(structure: AnatomicStructure, name: string): boolean
     return structure.title.toLowerCase() === name.toLowerCase();
 }
 
-function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout }: { currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
+function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout, isReal }: { isReal: boolean, currentStructure?: AnatomicStructure, timed: boolean, onSuccess: (result: string) => void, onFailure: (result: string) => void, onTimeout: () => void }) {
     let [showHint, setShowHint] = useState(false);
     let [submission, setSubmission] = useState("");
 
@@ -113,6 +118,15 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
         <div className="learn-container">
             <div style={{ height: "max(300px, calc(100vh - 370px))", flexGrow: 2 }}>
                 <ZoomImage
+                    pMarkers={!!currentStructure ? [{
+                        centerX: currentStructure.centerX,
+                        centerY: currentStructure.centerY,
+                        radius: currentStructure.selectionRadius / 10,
+                        markerWidth: 1,
+                        markerColor: colors["error-color"],
+                        clickable: false,
+                        onClick: null,
+                    }] : undefined}
                     src={currentStructure?.img}
                     position={!!currentStructure ? {
                         x: currentStructure.centerX,
@@ -124,7 +138,8 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
                 <div style={{ display: "flex" }}>
                     <div style={{ flexGrow: 1 }}>
                         <span className="exam-prompt">Was ist der Name des angezeigten Knochens?</span>
-                        <form onSubmit={() => {
+                        <form onSubmit={(e: any) => {
+                            e.preventDefault();
                             if (testUserSubmission(currentStructure!, submission)) {
                                 onSuccess(submission);
                             } else {
@@ -136,10 +151,14 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
                                 <Button type="submit" onClick={() => { }}>Absenden</Button>
                             </div>
                         </form>
-                        <div className="exam-hint-container">
-                            <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
-                            {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
-                        </div>
+                        {
+                            !isReal ?
+                                <div className="exam-hint-container">
+                                    <IconButton inverted={true} color="accent" onClick={() => { setShowHint(!showHint); }} icon={mdiInformationOutline}></IconButton>
+                                    {showHint ? <div>Tipp: {currentStructure?.tip}</div> : undefined}
+                                </div>
+                                : null
+                        }
                     </div>
                 </div>
                 <div className="learn-button-spacer"></div>
@@ -156,19 +175,39 @@ function QuestionText({ currentStructure, timed, onSuccess, onFailure, onTimeout
 }
 
 const quotes_correct = [
-    "Omg du bist der geilste, Bruder! Du hast voll recht mit \"{correct}\"!!!"
+    "Omg du bist der geilste, Bruder! Du hast voll recht mit \"{correct}\"!!!",
+    "Digga bist du gut, \"{correct}\" ist richtig!!!",
+    "\"{correct}\" is korrekt, du Genie!!!",
+    "Ding, Ding, Ding, \"{correct}\" ist die richtige Antwort!!!"
 ];
+
 
 const quotes_empty = [
-    "Du hast garnix eingegeben digga, eigentlich wäre es \"{correct}\", smh....."
+    "Du hast garnix eingegeben digga, eigentlich wäre es \"{correct}\", smh.....",
+    "Falls du die richtige Antwort suchst, die war \"{correct}\".....",
+    "Von nix kommt nix, \"{correct}\" wäre die richtige Antwort",
+    "Du hast leider nichts eingegeben, \"{correct}\" wäre richtig gewesen"
 ];
 
-const quotes_wrong = [
-    "Meine Güte, das ist doch nicht \"{wrong}\", das ist \"{correct}\", smh....."
+
+const quotes_wrong_txt = [
+    "Meine Güte, das ist doch nicht \"{wrong}\", das ist \"{correct}\", smh.....",
+    "Nein Junge nicht \"{wrong}\", das ist \"{correct}\".",
+    "\"{wrong}\" ist leider nicht korrekt, \"{correct}\" wäre richtig gewesen."
 ];
+
+
+const quotes_wrong_img = [
+    "Meine Güte, du hast \"{wrong}\" angeklickt, das ist total falsch! Du solltest \"{correct}\" finden, smh.....",
+    "Das ist doch nicht \"{correct}\", du hast \"{wrong}\" angeklickt Mensch.",
+    "Das war leider \"{wrong}\", und nicht \"{correct}\"."
+];
+
 
 const quotes_slow = [
-    "Das war ja eigentlich der \"{correct}\", aber du hast ja noch gewartet dass die Schnecke die Straße überquert."
+    "Das war ja eigentlich der \"{correct}\", aber du hast ja noch gewartet dass die Schnecke die Straße überquert.",
+    "Zu langsam! \"{correct}\" wäre es gewesen.",
+    "\"{correct}\" wäre richtig gewesen, aber das ging dir wohl zu schnell."
 ];
 
 function Correct({ next, structure }: { next: (e: any) => void, structure: AnatomicStructure }) {
@@ -197,13 +236,13 @@ function Correct({ next, structure }: { next: (e: any) => void, structure: Anato
     );
 }
 
-function Wrong({ next, structure, submission }: { next: (e: any) => void, structure: AnatomicStructure, submission: any }) {
+function Wrong({ next, structure, submission, mode }: { next: (e: any) => void, structure: AnatomicStructure, submission: any, mode: ExamMode }) {
     const select = (list: any) => {
         let i = Math.round(Math.random() * (list.length - 1));
         return list[i];
     }
 
-    let text = select(submission ? quotes_wrong : quotes_empty);
+    let text = select(submission ? (mode === ExamMode.FailureImage ? quotes_wrong_img : quotes_wrong_txt) : quotes_empty);
 
     function cont(e: any) {
         e.preventDefault();
@@ -219,6 +258,18 @@ function Wrong({ next, structure, submission }: { next: (e: any) => void, struct
                     <Button autoFocus type="submit" size="large" color="accent" onClick={() => { }}>Nächste</Button>
                 </form>
             </div>
+        </div>
+    );
+}
+
+function Intermission({ next }: { next: (e: any) => void }) {
+    useEffect(() => {
+        setTimeout(next, 1500);
+    });
+
+    return (
+        <div>
+            <span style={{ fontSize: "28px" }}>Nächste frage kommt gleich...</span>
         </div>
     );
 }
@@ -269,7 +320,7 @@ function ResultItem({ first, last, status, children }: { first: boolean, last: b
     );
 }
 
-function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure> }) {
+function Finished({ correct, wrong, slow, isReal }: { correct: Array<AnatomicStructure>, wrong: Array<AnatomicStructure>, slow: Array<AnatomicStructure>, isReal: boolean }) {
     let auth = useAuth();
     let correctPercentage = Math.floor(100.0 * (correct.length / (correct.length + wrong.length + slow.length)));
     let correctWithStatus = correct.map(e => { (e as any).status = "correct"; return e; });
@@ -286,7 +337,9 @@ function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>,
             }
             await apiSubmitResult(result, auth.session.token);
         };
-        upload();
+        if (!isReal) {
+            upload();
+        }
     }, [correct, wrong, slow]);
 
     return (
@@ -319,10 +372,12 @@ function Finished({ correct, wrong, slow }: { correct: Array<AnatomicStructure>,
 enum ExamMode {
     AskImage,
     AskText,
-    Failure,
+    FailureText,
+    FailureImage,
     Success,
     Timeout,
     Finished,
+    Intermission,
 }
 
 function getNextMode(textMode: boolean, imageMode: boolean, supportedModes: Array<"img" | "text">): ExamMode {
@@ -341,7 +396,13 @@ function getNextMode(textMode: boolean, imageMode: boolean, supportedModes: Arra
     }
 }
 
-function RegularExam({ textMode, imageMode, timed, category }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean }) {
+interface Category {
+    name: string,
+    key: string,
+    elements: Array<string>,
+}
+
+function RegularExam({ textMode, imageMode, timed, category, isReal }: { category: string, textMode: boolean, imageMode: boolean, timed: boolean, isReal: boolean }) {
     let [structures, setStructures] = useState<Array<AnatomicStructure>>([]);
     let [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -364,10 +425,29 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
             if (resp.ok) {
                 rawData = await resp.json();
             }
-            let categories = await apiGetCategories();
+            let categories: Array<Category>;
+            let resp2 = await apiGetCategories();
+            if (resp2.ok) {
+                let data = await resp2.json();
+                categories = data;
+            }
             let foundCategory = categories.find(c => c.key === category)!;
 
-            setStructures(rawData.filter((elem: any) => foundCategory.elements.includes(elem.key)).map(
+            let half_secs = Math.round(Date.now() / 2000);
+            let rng = seedrandom(half_secs.toString());
+
+            function shuffle(a: Array<any>) {
+                var j, x, i;
+                for (i = a.length - 1; i > 0; i--) {
+                    j = Math.floor(rng() * (i + 1));
+                    x = a[i];
+                    a[i] = a[j];
+                    a[j] = x;
+                }
+                return a;
+            }
+
+            let matchingStructures = rawData.filter((elem: any) => foundCategory.elements.includes(elem.key)).map(
                 (elem: any) => {
                     return {
                         centerX: elem.imgPosX,
@@ -381,7 +461,9 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                         modes: elem.examModes
                     };
                 }
-            ));
+            );
+            console.log("setstrcututreurss");
+            setStructures(shuffle(matchingStructures));
         };
         getInfo();
     }, [setStructures]);
@@ -424,10 +506,14 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
         }
     }
 
+    useEffect(() => {
+        console.log(currentStructure);
+    }, [currentStructure]);
+
     return (
         <Card style={{ width: "60%" }} loading={structures.length === 0}>
             <div style={{ textAlign: "center" }}>
-                <span className="card-title">Reguläre Abfrage</span>
+                <span className="card-title">{isReal ? "Prüfung" : "Reguläre Abfrage"}</span>
             </div>
             <div>
                 {
@@ -437,43 +523,74 @@ function RegularExam({ textMode, imageMode, timed, category }: { category: strin
                                 return <QuestionImage structures={structures}
                                     currentStructure={currentStructure}
                                     timed={timed}
-                                    onSuccess={() => {
-                                        addCorrect(currentStructure);
-                                        setMode(ExamMode.Success);
-                                    }}
-                                    onFailure={() => {
-                                        addWrong(currentStructure);
-                                        setMode(ExamMode.Failure);
-                                    }}
-                                    onTimeout={() => {
-                                        addSlow(currentStructure);
-                                        setMode(ExamMode.Timeout);
-                                    }} />;
-                            case ExamMode.AskText:
-                                return <QuestionText currentStructure={currentStructure}
-                                    timed={timed}
+                                    isReal={isReal}
                                     onSuccess={(result: string) => {
                                         addCorrect(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.Success);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Success);
+                                        }
                                     }}
                                     onFailure={(result: string) => {
                                         addWrong(currentStructure);
                                         setUserSubmission(result);
-                                        setMode(ExamMode.Failure);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.FailureImage);
+                                        }
                                     }}
                                     onTimeout={() => {
                                         addSlow(currentStructure);
-                                        setMode(ExamMode.Timeout);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Timeout);
+                                        }
+                                    }} />;
+                            case ExamMode.AskText:
+                                return <QuestionText currentStructure={currentStructure}
+                                    timed={timed}
+                                    isReal={isReal}
+                                    onSuccess={(result: string) => {
+                                        addCorrect(currentStructure);
+                                        setUserSubmission(result);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Success);
+                                        }
+                                    }}
+                                    onFailure={(result: string) => {
+                                        addWrong(currentStructure);
+                                        setUserSubmission(result);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.FailureText);
+                                        }
+                                    }}
+                                    onTimeout={() => {
+                                        addSlow(currentStructure);
+                                        if (isReal) {
+                                            setMode(ExamMode.Intermission);
+                                        } else {
+                                            setMode(ExamMode.Timeout);
+                                        }
                                     }} />;
                             case ExamMode.Success:
                                 return <Correct structure={currentStructure} next={askNext} />;
-                            case ExamMode.Failure:
-                                return <Wrong structure={currentStructure} submission={userSubmission} next={askNext} />;
+                            case ExamMode.FailureText:
+                            case ExamMode.FailureImage:
+                                return <Wrong mode={mode} structure={currentStructure} submission={userSubmission} next={askNext} />;
                             case ExamMode.Timeout:
                                 return <Timeout structure={currentStructure} next={askNext} />;
                             case ExamMode.Finished:
-                                return <Finished correct={correct} wrong={wrong} slow={slow} />;
+                                return <Finished correct={correct} wrong={wrong} slow={slow} isReal={isReal} />;
+                            case ExamMode.Intermission:
+                                return <Intermission next={askNext} />;
                         }
                     })()
                 }
