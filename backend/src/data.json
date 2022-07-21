@@ -1,0 +1,17 @@
+[
+    {
+        "imgPosX": 1000,
+        "imgPosY": 2450,
+        "selectionRadius": 100,
+        "radius": 100,
+        "img": "/res/skelett.jpg",
+        "examModes": [
+            "img",
+            "text"
+        ],
+        "key": "femur",
+        "name": "Femur",
+        "description": "Der Oberschenkelknochen, auch Femur genannt, ist einer der härtesten Knochen im Körper.",
+        "tip": "Im Beinbereich"
+    }
+]
